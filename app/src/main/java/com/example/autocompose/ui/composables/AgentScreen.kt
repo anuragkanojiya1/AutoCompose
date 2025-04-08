@@ -76,6 +76,9 @@ import com.example.autocompose.ui.theme.AutoComposeTheme
 import com.example.autocompose.ui.viewmodel.AutoComposeViewmodel
 import com.example.autocompose.ui.viewmodel.FrequentEmailViewModel
 import android.util.Log
+import androidx.compose.foundation.layout.IntrinsicSize
+import androidx.compose.foundation.layout.width
+import androidx.compose.material3.HorizontalDivider
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -88,7 +91,7 @@ fun AgentScreen(
     var language by remember { mutableStateOf("en") }
     var languageExpanded by remember { mutableStateOf(false) }
     var selectedTone by remember { mutableStateOf("Professional") }
-    var selectedModel by remember { mutableStateOf("GPT-4") }
+    var selectedModel by remember { mutableStateOf("Llama") }
     var subject by remember { mutableStateOf("") }
     var emailContent by remember { mutableStateOf("") }
     var emailContext by remember { mutableStateOf("") }
@@ -117,28 +120,36 @@ fun AgentScreen(
         }
     }
 
+    LaunchedEffect(emailSubject.value) {
+        subject = emailSubject.value
+    }
+
+    LaunchedEffect(generatedEmail.value) {
+        emailContent = generatedEmail.value
+    }
+
     Scaffold(
         topBar = {
             Column {
-            TopAppBar(
-                title = { Text("AutoCompose") },
-                actions = {
-                    IconButton(onClick = { /* Settings action */ }) {
-                        Icon(
-                            imageVector = Icons.Default.Settings,
-                            contentDescription = "Settings"
-                        )
-                    }
-                },
-                colors = TopAppBarDefaults.topAppBarColors(
-                    containerColor = Color.White
+                TopAppBar(
+                    title = { Text("AutoCompose") },
+//                    actions = {
+//                        IconButton(onClick = { /* Settings action */ }) {
+//                            Icon(
+//                                imageVector = Icons.Default.Settings,
+//                                contentDescription = "Settings"
+//                            )
+//                        }
+//                    },
+                    colors = TopAppBarDefaults.topAppBarColors(
+                        containerColor = Color.White
+                    )
                 )
-            )
-            Divider(modifier = Modifier.padding(bottom = 12.dp),
-                thickness = 1.dp,
-                color = Color(0xFFDCDBDB)
-            )
-        }
+                HorizontalDivider(modifier = Modifier.padding(bottom = 12.dp),
+                    thickness = 1.dp,
+                    color = Color(0xFFDCDBDB)
+                )
+            }
         },
     ) { innerPadding ->
         Column(modifier = Modifier
@@ -213,14 +224,19 @@ fun AgentScreen(
 
                             ExposedDropdownMenuBox(
                                 expanded = languageExpanded,
-                                onExpandedChange = { languageExpanded = !languageExpanded }
+                                onExpandedChange = { languageExpanded = !languageExpanded },
                             ) {
                                 Row(
                                     verticalAlignment = Alignment.CenterVertically,
                                     modifier = Modifier.menuAnchor()
+                                        .width(88.dp)
                                 ) {
                                     Text(
-                                        text = if (language == "en") "English" else if (language == "es") "Spanish" else "French",
+                                        text = if (language == "en") "English"
+                                        else if (language == "es") "Spanish"
+                                        else if (language == "fr") "French"
+                                        else if (language == "jpn") "Japanese"
+                                        else "English",
                                         fontWeight = FontWeight.Normal,
                                         fontSize = 16.sp
                                     )
@@ -253,6 +269,13 @@ fun AgentScreen(
                                             languageExpanded = false
                                         }
                                     )
+                                    DropdownMenuItem(
+                                        text = { Text("Japanese") },
+                                        onClick = {
+                                            language = "jpn"
+                                            languageExpanded = false
+                                        }
+                                    )
                                 }
                             }
                         }
@@ -269,7 +292,7 @@ fun AgentScreen(
                             modifier = Modifier.fillMaxWidth(),
                             horizontalArrangement = Arrangement.spacedBy(8.dp),
                         ) {
-                            val models = listOf("GPT-4", "Gemini", "Claude")
+                            val models = listOf("Gemini", "Mistral", "Llama")
                             models.forEach { model ->
                                 FilterChip(
                                     selected = selectedModel == model,
@@ -353,10 +376,7 @@ fun AgentScreen(
                         tint = Color.White
                     )
                 }
-                LaunchedEffect(emailSubject.value.isNotEmpty()) {
-                    subject = emailSubject.value.toString()
-                }
-                // Subject field
+
                 OutlinedTextField(
                     value = subject,
                     onValueChange = { subject = it },
@@ -371,11 +391,6 @@ fun AgentScreen(
                     shape = RoundedCornerShape(12.dp)
                 )
 
-                LaunchedEffect(generatedEmail.value.isNotEmpty()) {
-                    emailContent = generatedEmail.value
-                }
-
-                // Email content
                 Card(
                     modifier = Modifier
                         .fillMaxWidth()
@@ -415,7 +430,7 @@ fun AgentScreen(
 
                 Button(
                     onClick = {
-                        if (generatedEmail.value.isNotEmpty() && subject.isNotEmpty() && emailContent.isNotEmpty()) {
+                        if (emailContext.isNotEmpty() && recipientEmail.isNotEmpty()) {
                             autoComposeViewmodel.generateEmail(
                                 tone = selectedTone,
                                 ai_model = selectedModel,
@@ -449,7 +464,27 @@ fun AgentScreen(
                     horizontalArrangement = Arrangement.spacedBy(8.dp)
                 ) {
                     Button(
-                        onClick = { /* Save draft action */ },
+                        onClick = {
+                            if (subject.isNotEmpty() && emailContent.isNotEmpty())
+                            try {
+                                // Save email to the database and increment frequency
+                                frequentEmailViewModel.saveOrUpdateEmail(
+                                    subject = emailSubject.value,
+                                    emailBody = generatedEmail.value
+                                )
+                                Log.d("AgentScreen", "Sending email with subject: '${emailSubject.value}'")
+                                Log.d("AgentScreen", "Updated frequency in database")
+                                context.startActivity(createEmailIntent())
+                            } catch (e: ActivityNotFoundException) {
+                                Log.e("AgentScreen", "Gmail app not installed!", e)
+                                Toast.makeText(context, "Gmail app not installed!", Toast.LENGTH_SHORT).show()
+                            } catch (e: Exception) {
+                                Log.e("AgentScreen", "Error sending email", e)
+                                Toast.makeText(context, "Error sending email: ${e.message}", Toast.LENGTH_SHORT).show()
+                            }
+                            else
+                                Toast.makeText(context, "Please generate subject and email content", Toast.LENGTH_SHORT).show()
+                        },
                         modifier = Modifier.weight(1f),
                         colors = ButtonDefaults.buttonColors(
                             containerColor = Color.White,
@@ -472,6 +507,7 @@ fun AgentScreen(
 
                     Button(
                         onClick = {
+                            if (subject.isNotEmpty() && emailContent.isNotEmpty())
                             try {
                                 // Save email to the database and increment frequency
                                 frequentEmailViewModel.saveOrUpdateEmail(
@@ -488,6 +524,8 @@ fun AgentScreen(
                                 Log.e("AgentScreen", "Error sending email", e)
                                 Toast.makeText(context, "Error sending email: ${e.message}", Toast.LENGTH_SHORT).show()
                             }
+                            else
+                                Toast.makeText(context, "Please generate subject and email content", Toast.LENGTH_SHORT).show()
                         },
                         modifier = Modifier.weight(1f),
                         colors = ButtonDefaults.buttonColors(

@@ -76,6 +76,7 @@ import com.example.autocompose.ui.theme.AutoComposeTheme
 import com.example.autocompose.ui.viewmodel.AutoComposeViewmodel
 import com.example.autocompose.ui.viewmodel.FrequentEmailViewModel
 import android.util.Log
+import androidx.compose.foundation.layout.width
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -91,7 +92,7 @@ fun DraftAgentScreen(
     var language by remember { mutableStateOf("en") }
     var languageExpanded by remember { mutableStateOf(false) }
     var selectedTone by remember { mutableStateOf("Professional") }
-    var selectedModel by remember { mutableStateOf("GPT-4") }
+    var selectedModel by remember { mutableStateOf("DeepSeek") }
     var subject by remember { mutableStateOf(passSubject) }
     var emailContent by remember { mutableStateOf(passEmailContent) }
     var emailContext by remember { mutableStateOf("") }
@@ -127,14 +128,14 @@ fun DraftAgentScreen(
             Column {
                 TopAppBar(
                     title = { Text("AutoCompose") },
-                    actions = {
-                        IconButton(onClick = { /* Settings action */ }) {
-                            Icon(
-                                imageVector = Icons.Default.Settings,
-                                contentDescription = "Settings"
-                            )
-                        }
-                    },
+//                    actions = {
+//                        IconButton(onClick = { /* Settings action */ }) {
+//                            Icon(
+//                                imageVector = Icons.Default.Settings,
+//                                contentDescription = "Settings"
+//                            )
+//                        }
+//                    },
                     colors = TopAppBarDefaults.topAppBarColors(
                         containerColor = Color.White
                     )
@@ -223,9 +224,14 @@ fun DraftAgentScreen(
                                 Row(
                                     verticalAlignment = Alignment.CenterVertically,
                                     modifier = Modifier.menuAnchor()
+                                        .width(88.dp)
                                 ) {
                                     Text(
-                                        text = if (language == "en") "English" else if (language == "es") "Spanish" else "French",
+                                        text = if (language == "en") "English"
+                                        else if (language == "es") "Spanish"
+                                        else if (language == "fr") "French"
+                                        else if (language == "jpn") "Japanese"
+                                        else "English",
                                         fontWeight = FontWeight.Normal,
                                         fontSize = 16.sp
                                     )
@@ -258,6 +264,13 @@ fun DraftAgentScreen(
                                             languageExpanded = false
                                         }
                                     )
+                                    DropdownMenuItem(
+                                        text = { Text("Japanese") },
+                                        onClick = {
+                                            language = "jpn"
+                                            languageExpanded = false
+                                        }
+                                    )
                                 }
                             }
                         }
@@ -274,7 +287,7 @@ fun DraftAgentScreen(
                             modifier = Modifier.fillMaxWidth(),
                             horizontalArrangement = Arrangement.spacedBy(8.dp),
                         ) {
-                            val models = listOf("GPT-4", "Gemini", "Claude")
+                            val models = listOf("DeepSeek", "Gemini", "Mistral")
                             models.forEach { model ->
                                 FilterChip(
                                     selected = selectedModel == model,
@@ -412,58 +425,58 @@ fun DraftAgentScreen(
                 }
 
 
-                Button(
-                    onClick = {
-                        autoComposeViewmodel.generateEmail(
-                            tone = selectedTone,
-                            ai_model = selectedModel,
-                            language = language,
-                            context = emailContext
-                        )
-                    },
-                    modifier = Modifier.fillMaxWidth(),
-                    colors = ButtonDefaults.buttonColors(
-                        containerColor = primaryBlue
-                    )
-                ) {
-                    Row(
-                        horizontalArrangement = Arrangement.spacedBy(8.dp),
-                        verticalAlignment = Alignment.CenterVertically
-                    ) {
-                        Icon(
-                            imageVector = Icons.Filled.Loop,
-                            contentDescription = "Generate Email"
-                        )
-                        Text("Generate")
-                    }
-                }
+//                Button(
+//                    onClick = {
+//                        autoComposeViewmodel.generateEmail(
+//                            tone = selectedTone,
+//                            ai_model = selectedModel,
+//                            language = language,
+//                            context = emailContext
+//                        )
+//                    },
+//                    modifier = Modifier.fillMaxWidth(),
+//                    colors = ButtonDefaults.buttonColors(
+//                        containerColor = primaryBlue
+//                    )
+//                ) {
+//                    Row(
+//                        horizontalArrangement = Arrangement.spacedBy(8.dp),
+//                        verticalAlignment = Alignment.CenterVertically
+//                    ) {
+//                        Icon(
+//                            imageVector = Icons.Filled.Loop,
+//                            contentDescription = "Generate Email"
+//                        )
+//                        Text("Generate")
+//                    }
+//                }
 
                 // Bottom buttons
                 Row(
                     modifier = Modifier.fillMaxWidth(),
                     horizontalArrangement = Arrangement.spacedBy(8.dp)
                 ) {
-                    Button(
-                        onClick = { /* Save draft action */ },
-                        modifier = Modifier.weight(1f),
-                        colors = ButtonDefaults.buttonColors(
-                            containerColor = Color.White,
-                            contentColor = Color.Black,
-                        ),
-                        border = BorderStroke(1.dp, Color(0xFF2196F3)),
-                    ) {
-                        Row(
-                            horizontalArrangement = Arrangement.spacedBy(8.dp),
-                            verticalAlignment = Alignment.CenterVertically
-                        ) {
-                            Icon(
-                                imageVector = Icons.AutoMirrored.Sharp.Message,
-                                contentDescription = "Save Draft",
-                                tint = Color(0xFF2196F3)
-                            )
-                            Text("Save Draft", color = Color(0xFF2196F3))
-                        }
-                    }
+//                    Button(
+//                        onClick = { /* Save draft action */ },
+//                        modifier = Modifier.weight(1f),
+//                        colors = ButtonDefaults.buttonColors(
+//                            containerColor = Color.White,
+//                            contentColor = Color.Black,
+//                        ),
+//                        border = BorderStroke(1.dp, Color(0xFF2196F3)),
+//                    ) {
+//                        Row(
+//                            horizontalArrangement = Arrangement.spacedBy(8.dp),
+//                            verticalAlignment = Alignment.CenterVertically
+//                        ) {
+//                            Icon(
+//                                imageVector = Icons.AutoMirrored.Sharp.Message,
+//                                contentDescription = "Save Draft",
+//                                tint = Color(0xFF2196F3)
+//                            )
+//                            Text("Save Draft", color = Color(0xFF2196F3))
+//                        }
+//                    }
 
                     Button(
                         onClick = {
