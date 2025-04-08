@@ -37,7 +37,9 @@ import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -72,7 +74,10 @@ fun HomeScreen(
     val primaryBlue = Color(0xFF2196F3)
 
     val frequentEmails by frequentEmailViewModel.frequentEmails.collectAsState()
-
+    val maxInitialEmails = 3
+    val maxEmailsIncrement = 3
+    val (displayCount, setDisplayCount) = remember { mutableStateOf(maxInitialEmails) }
+    
     val context = LocalContext.current
 
     // Add logging when emails are collected
@@ -88,16 +93,16 @@ fun HomeScreen(
             Column {
                 TopAppBar(
                     title = { Text("AutoCompose") },
-                    actions = {
-                        IconButton(onClick = {
-
-                        }) {
-                            Icon(
-                                imageVector = Icons.Default.Search,
-                                contentDescription = "Search"
-                            )
-                        }
-                    },
+//                    actions = {
+//                        IconButton(onClick = {
+//
+//                        }) {
+//                            Icon(
+//                                imageVector = Icons.Default.Search,
+//                                contentDescription = "Search"
+//                            )
+//                        }
+//                    },
                     colors = TopAppBarDefaults.topAppBarColors(
                         containerColor = Color.White
                     )
@@ -109,6 +114,7 @@ fun HomeScreen(
                 )
             }
         },
+        modifier = Modifier.background(color = Color.White)
     ) { innerPadding ->
         Column(
             modifier = Modifier
@@ -125,7 +131,10 @@ fun HomeScreen(
                     .background(color = Color.White),
                 color = MaterialTheme.colorScheme.background
             ) {
-                Box {
+                Box(modifier = Modifier
+                    .fillMaxWidth()
+                    .background(color = Color.White)
+                ) {
                     Animation(
                         modifier = Modifier
                         .size(240.dp, 240.dp)
@@ -172,7 +181,7 @@ fun HomeScreen(
             // Email Items - Show frequent emails from database
             if (frequentEmails.isNotEmpty()) {
                 Log.d("HomeScreen", "Displaying ${frequentEmails.size} frequent emails in UI")
-                frequentEmails.take(3).forEach { email ->
+                frequentEmails.take(displayCount).forEach { email ->
                     // Extract first letters from subject words to create initials
                     val words = email.subject.split(" ")
                     val initials = if (words.size >= 2) {
@@ -201,39 +210,42 @@ fun HomeScreen(
             } else {
                 // Fallback to static data if no frequent emails
                 Log.d("HomeScreen", "No frequent emails found, showing static data")
-                EmailItem(
-                    initials = "JS",
-                    name = "John Smith",
-                    subject = "Project Update",
-                    preview = "Here are the latest changes to the project",
-                    time = "10:30 AM",
-                    backgroundColor = Color(0xFFF8F7F7),
-                    onClick = {}
-                )
 
-                Divider(thickness = 1.dp, color = Color(0xFFEEEEEE))
+                Text(text = "No emails found")
 
-                EmailItem(
-                    initials = "MT",
-                    name = "Marketing Team",
-                    subject = "Campaign Results",
-                    preview = "The Q1 campaign metrics show significant",
-                    time = "9:15 AM",
-                    backgroundColor = Color(0xFFF8F7F7),
-                    onClick = {}
-                )
-
-                Divider(thickness = 1.dp, color = Color(0xFFEEEEEE))
-
-                EmailItem(
-                    initials = "SJ",
-                    name = "Sarah Johnson",
-                    subject = "Meeting Notes",
-                    preview = "Please find attached the minutes from",
-                    time = "Yesterday",
-                    backgroundColor = Color(0xFFF8F7F7),
-                    onClick = {}
-                )
+//                EmailItem(
+//                    initials = "JS",
+//                    name = "John Smith",
+//                    subject = "Project Update",
+//                    preview = "Here are the latest changes to the project",
+//                    time = "10:30 AM",
+//                    backgroundColor = Color(0xFFF8F7F7),
+//                    onClick = {}
+//                )
+//
+//                Divider(thickness = 1.dp, color = Color(0xFFEEEEEE))
+//
+//                EmailItem(
+//                    initials = "MT",
+//                    name = "Marketing Team",
+//                    subject = "Campaign Results",
+//                    preview = "The Q1 campaign metrics show significant",
+//                    time = "9:15 AM",
+//                    backgroundColor = Color(0xFFF8F7F7),
+//                    onClick = {}
+//                )
+//
+//                Divider(thickness = 1.dp, color = Color(0xFFEEEEEE))
+//
+//                EmailItem(
+//                    initials = "SJ",
+//                    name = "Sarah Johnson",
+//                    subject = "Meeting Notes",
+//                    preview = "Please find attached the minutes from",
+//                    time = "Yesterday",
+//                    backgroundColor = Color(0xFFF8F7F7),
+//                    onClick = {}
+//                )
             }
 
             Spacer(modifier = Modifier.height(16.dp))
@@ -241,7 +253,10 @@ fun HomeScreen(
             // Show More Button
             Card(
                 modifier = Modifier.fillMaxWidth(),
-                shape = RoundedCornerShape(8.dp)
+                shape = RoundedCornerShape(8.dp),
+                onClick = {
+                    setDisplayCount(displayCount + maxEmailsIncrement)
+                }
             ) {
                 Box(
                     modifier = Modifier
@@ -251,8 +266,8 @@ fun HomeScreen(
                     contentAlignment = Alignment.Center
                 ) {
                     Text(
-                        text = "Show More ➤",
-                        color = primaryBlue,
+                        text = if (displayCount >= frequentEmails.size) "No more emails" else "Show More ➤",
+                        color = if (displayCount >= frequentEmails.size) Color.Gray else primaryBlue,
                         fontWeight = FontWeight.Medium
                     )
                 }

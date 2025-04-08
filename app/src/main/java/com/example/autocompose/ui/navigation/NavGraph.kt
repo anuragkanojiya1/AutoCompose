@@ -16,7 +16,6 @@ import androidx.navigation.navArgument
 import com.example.autocompose.ui.composables.AgentScreen
 import com.example.autocompose.ui.composables.DraftAgentScreen
 import com.example.autocompose.ui.composables.HomeScreen
-import com.example.autocompose.ui.composables.SettingScreen
 import com.example.autocompose.ui.viewmodel.AutoComposeViewmodel
 import com.example.autocompose.ui.viewmodel.FrequentEmailViewModel
 
@@ -58,7 +57,6 @@ fun NavGraph(navController: NavController,
         composable(
             route = Screen.SettingsScreen.route
         ){
-            SettingScreen()
         }
 
     }
