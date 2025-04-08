@@ -453,9 +453,37 @@ fun DraftAgentScreen(
 
                 // Bottom buttons
                 Row(
-                    modifier = Modifier.fillMaxWidth(),
+                    modifier = Modifier,
                     horizontalArrangement = Arrangement.spacedBy(8.dp)
                 ) {
+                    Button(
+                        onClick = {
+                            autoComposeViewmodel.generateEmail(
+                                tone = selectedTone,
+                                ai_model = selectedModel,
+                                language = language,
+                                context = emailContext
+                            )
+                        },
+                        modifier = Modifier.weight(1f),
+                        colors = ButtonDefaults.buttonColors(
+                            containerColor = Color.White,
+                            contentColor = Color.Black,
+                        ),
+                        border = BorderStroke(1.dp, Color(0xFF2196F3)),
+                    ) {
+                        Row(
+                            horizontalArrangement = Arrangement.spacedBy(8.dp),
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            Icon(
+                                imageVector = Icons.Filled.Loop,
+                                contentDescription = "Generate Email",
+                                tint = Color(0xFF2196F3)
+                            )
+                            Text("Generate", color = Color(0xFF2196F3))
+                        }
+                    }
 //                    Button(
 //                        onClick = { /* Save draft action */ },
 //                        modifier = Modifier.weight(1f),
@@ -514,7 +542,6 @@ fun DraftAgentScreen(
                         }
                     }
                 }
-                Spacer(modifier = Modifier.height(16.dp))
             }
         }
     }

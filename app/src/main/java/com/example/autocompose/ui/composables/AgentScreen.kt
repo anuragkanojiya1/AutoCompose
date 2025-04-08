@@ -544,7 +544,6 @@ fun AgentScreen(
                         }
                     }
                 }
-                Spacer(modifier = Modifier.height(16.dp))
             }
         }
     }
