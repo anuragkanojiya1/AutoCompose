@@ -1,4 +1,4 @@
-# 💌 AutoCompose — AI-Powered Multilingual Email Generator
+# 💌 AutoCompose — AI-Powered Multilingual Email Agent
 
 AutoCompose is an intelligent email composition agent built for speed, multilingual fluency, and seamless user experience. Whether you're writing a formal email in Japanese or a casual one in Spanish, AutoCompose instantly crafts high-quality emails in multiple tones and languages with voice input, draft saving, and even one-tap Gmail integration.
 
@@ -9,7 +9,7 @@ AutoCompose is an intelligent email composition agent built for speed, multiling
 ### 🧠 AI Email Generation
 - Powered by **Gemini**, **Mistral**, **Groq**, and **LangGraph**.
 - Supports multiple languages: **English, French, Spanish, Japanese**.
-- Choose your desired **tone**: formal, friendly, assertive, casual, etc.
+- Choose your desired **tone**: formal, friendly and professional.
 - Advanced **LangGraph** workflows to optimize generation flows.
 
 ### 💬 Voice Input
