@@ -5,4 +5,5 @@ sealed class Screen(val route: String){
     object AgentScreen : Screen("agent_screen")
     object DraftAgentScreen : Screen("draft_agent_screen/{subject}/{emailBody}")
     object SettingsScreen : Screen("settings_screen")
+    object Splash : Screen("splash_screen")
 }

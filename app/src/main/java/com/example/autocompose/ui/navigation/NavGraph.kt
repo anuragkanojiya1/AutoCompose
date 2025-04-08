@@ -13,6 +13,7 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
+import com.example.autocompose.SplashScreen
 import com.example.autocompose.ui.composables.AgentScreen
 import com.example.autocompose.ui.composables.DraftAgentScreen
 import com.example.autocompose.ui.composables.HomeScreen
@@ -28,7 +29,7 @@ fun NavGraph(navController: NavController,
     val context = LocalContext.current
     val navController = rememberNavController()
 
-    NavHost(navController, startDestination = Screen.Home.route) {
+    NavHost(navController, startDestination = Screen.Splash.route) {
         composable(Screen.Home.route,
             enterTransition = { slideInHorizontally(initialOffsetX = { it }) + fadeIn() },
             exitTransition = { slideOutHorizontally(targetOffsetX = { -it }) + fadeOut() }) {
@@ -48,14 +49,22 @@ fun NavGraph(navController: NavController,
             arguments = listOf(
                 navArgument("subject") { type = NavType.StringType },
                 navArgument("emailBody") { type = NavType.StringType }
-            )
+            ),
+            enterTransition = { slideInHorizontally(initialOffsetX = { it }) + fadeIn() },
+            exitTransition = { slideOutHorizontally(targetOffsetX = { -it }) + fadeOut() }
         ) { backStackEntry ->
             val subject = backStackEntry.arguments?.getString("subject") ?: ""
             val emailBody = backStackEntry.arguments?.getString("emailBody") ?: ""
             DraftAgentScreen(autoComposeViewmodel, frequentEmailViewModel, subject, emailBody)
         }
+
+        composable(Screen.Splash.route){
+            SplashScreen(navController)
+        }
         composable(
-            route = Screen.SettingsScreen.route
+            route = Screen.SettingsScreen.route,
+            enterTransition = { slideInHorizontally(initialOffsetX = { it }) + fadeIn() },
+            exitTransition = { slideOutHorizontally(targetOffsetX = { -it }) + fadeOut() }
         ){
         }
 
