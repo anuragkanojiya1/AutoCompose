@@ -16,10 +16,14 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.paddingFromBaseline
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.Clear
+import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
@@ -29,9 +33,11 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
@@ -74,10 +80,15 @@ fun HomeScreen(
     val primaryBlue = Color(0xFF2196F3)
 
     val frequentEmails by frequentEmailViewModel.frequentEmails.collectAsState()
+    val searchResults by frequentEmailViewModel.searchResults.collectAsState()
+    val isSearchActive by frequentEmailViewModel.isSearchActive.collectAsState()
+    var searchQuery by remember { mutableStateOf("") }
+    var showSearchBar by remember { mutableStateOf(false) }
+
     val maxInitialEmails = 3
     val maxEmailsIncrement = 3
     val (displayCount, setDisplayCount) = remember { mutableStateOf(maxInitialEmails) }
-    
+
     val context = LocalContext.current
 
     // Add logging when emails are collected
@@ -88,21 +99,65 @@ fun HomeScreen(
         }
     }
 
+    // Handle searching
+    fun handleSearch(query: String) {
+        searchQuery = query
+        if (query.isBlank()) {
+            frequentEmailViewModel.clearSearch()
+        } else {
+            frequentEmailViewModel.searchEmails(query)
+        }
+    }
+
     Scaffold(
         topBar = {
             Column {
                 TopAppBar(
-                    title = { Text("AutoCompose") },
-//                    actions = {
-//                        IconButton(onClick = {
-//
-//                        }) {
-//                            Icon(
-//                                imageVector = Icons.Default.Search,
-//                                contentDescription = "Search"
-//                            )
-//                        }
-//                    },
+                    title = {
+                        if (showSearchBar) {
+                            OutlinedTextField(
+                                value = searchQuery,
+                                onValueChange = { handleSearch(it) },
+                                placeholder = { Text("Search emails...") },
+                                modifier = Modifier.fillMaxWidth()
+                                    .padding(end = 16.dp)
+                                    .align(Alignment.CenterHorizontally),
+                                trailingIcon = {
+                                    IconButton(onClick = {
+                                        showSearchBar = false
+                                        searchQuery = ""
+                                        frequentEmailViewModel.clearSearch()
+                                    }) {
+                                        Icon(
+                                            imageVector = Icons.Default.Clear,
+                                            contentDescription = "Close Search"
+                                        )
+                                    }
+                                },
+                                singleLine = true,
+                                colors = TextFieldDefaults.outlinedTextFieldColors(
+                                    unfocusedTextColor = Color.Gray,
+                                    unfocusedBorderColor = Color(0xFFE7E6E6),
+                                    focusedBorderColor = Color(0xFFE7E6E6)
+                                ),
+                                shape = RoundedCornerShape(12.dp),
+                                )
+                        } else {
+                            Text("AutoCompose")
+                        }
+                    },
+                    actions = {
+                        if (!showSearchBar) {
+                            IconButton(onClick = {
+                                showSearchBar = true
+                            }) {
+                                Icon(
+                                    imageVector = Icons.Default.Search,
+                                    contentDescription = "Search"
+                                )
+                            }
+                        }
+                    },
                     colors = TopAppBarDefaults.topAppBarColors(
                         containerColor = Color.White
                     )
@@ -120,68 +175,79 @@ fun HomeScreen(
             modifier = Modifier
                 .fillMaxSize()
                 .background(Color.White)
+                .verticalScroll(rememberScrollState())
                 .padding(innerPadding)
                 .padding(16.dp)
         ) {
-
-            Surface(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .align(Alignment.CenterHorizontally)
-                    .background(color = Color.White),
-                color = MaterialTheme.colorScheme.background
-            ) {
-                Box(modifier = Modifier
-                    .fillMaxWidth()
-                    .background(color = Color.White)
+            if (!isSearchActive) {
+                Surface(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .align(Alignment.CenterHorizontally)
+                        .background(color = Color.White),
+                    color = MaterialTheme.colorScheme.background
                 ) {
-                    Animation(
-                        modifier = Modifier
-                        .size(240.dp, 240.dp)
-                        .align(Alignment.Center)
-                        .background(Color.White)
-                            .padding(bottom = 8.dp)
-                        // .scale(scaleX = 1.3f, scaleY = 1.6f)
+                    Box(modifier = Modifier
+                        .fillMaxWidth()
+                        .background(color = Color.White)
+                    ) {
+                        Animation(
+                            modifier = Modifier
+                            .size(240.dp, 240.dp)
+                            .align(Alignment.Center)
+                            .background(Color.White)
+                                .padding(bottom = 8.dp)
+                            // .scale(scaleX = 1.3f, scaleY = 1.6f)
+                        )
+                    }
+                }
+
+                // New Email Button
+                Button(
+                    onClick = { navController.navigate(Screen.AgentScreen.route) },
+                    modifier = Modifier.fillMaxWidth(),
+                    shape = RoundedCornerShape(8.dp),
+                    colors = ButtonDefaults.buttonColors(
+                        containerColor = primaryBlue
+                    )
+                ) {
+                    Icon(
+                        imageVector = Icons.Default.Add,
+                        contentDescription = null,
+                        tint = Color.White
+                    )
+                    Spacer(modifier = Modifier.size(8.dp))
+                    Text(
+                        text = "Compose",
+                        color = Color.White
                     )
                 }
+
+                Spacer(modifier = Modifier.height(24.dp))
             }
 
-            // New Email Button
-            Button(
-                onClick = { navController.navigate(Screen.AgentScreen.route) },
-                modifier = Modifier.fillMaxWidth(),
-                shape = RoundedCornerShape(8.dp),
-                colors = ButtonDefaults.buttonColors(
-                    containerColor = primaryBlue
-                )
-            ) {
-                Icon(
-                    imageVector = Icons.Default.Add,
-                    contentDescription = null,
-                    tint = Color.White
-                )
-                Spacer(modifier = Modifier.size(8.dp))
-                Text(
-                    text = "Compose",
-                    color = Color.White
-                )
-            }
-
-            Spacer(modifier = Modifier.height(24.dp))
-
-            // Recent Emails Section
+            // Title Section
             Text(
-                text = "Recent Emails",
+                text = if (isSearchActive) "Search Results" else "Recent Emails",
                 fontSize = 18.sp,
                 fontWeight = FontWeight.Medium
             )
 
             Spacer(modifier = Modifier.height(16.dp))
 
-            // Email Items - Show frequent emails from database
-            if (frequentEmails.isNotEmpty()) {
-                Log.d("HomeScreen", "Displaying ${frequentEmails.size} frequent emails in UI")
-                frequentEmails.take(displayCount).forEach { email ->
+            // Email Items - Show either search results or frequent emails
+            val emailsToDisplay = if (isSearchActive) searchResults else frequentEmails
+
+            if (emailsToDisplay.isNotEmpty()) {
+                if (isSearchActive) {
+                    Log.d("HomeScreen", "Displaying ${emailsToDisplay.size} search results")
+                } else {
+                    Log.d("HomeScreen", "Displaying ${emailsToDisplay.size} frequent emails in UI")
+                }
+
+                val displayLimit = if (isSearchActive) emailsToDisplay.size else displayCount.coerceAtMost(emailsToDisplay.size)
+
+                emailsToDisplay.take(displayLimit).forEach { email ->
                     // Extract first letters from subject words to create initials
                     val words = email.subject.split(" ")
                     val initials = if (words.size >= 2) {
@@ -209,67 +275,39 @@ fun HomeScreen(
                 }
             } else {
                 // Fallback to static data if no frequent emails
-                Log.d("HomeScreen", "No frequent emails found, showing static data")
-
-                Text(text = "No emails found")
-
-//                EmailItem(
-//                    initials = "JS",
-//                    name = "John Smith",
-//                    subject = "Project Update",
-//                    preview = "Here are the latest changes to the project",
-//                    time = "10:30 AM",
-//                    backgroundColor = Color(0xFFF8F7F7),
-//                    onClick = {}
-//                )
-//
-//                Divider(thickness = 1.dp, color = Color(0xFFEEEEEE))
-//
-//                EmailItem(
-//                    initials = "MT",
-//                    name = "Marketing Team",
-//                    subject = "Campaign Results",
-//                    preview = "The Q1 campaign metrics show significant",
-//                    time = "9:15 AM",
-//                    backgroundColor = Color(0xFFF8F7F7),
-//                    onClick = {}
-//                )
-//
-//                Divider(thickness = 1.dp, color = Color(0xFFEEEEEE))
-//
-//                EmailItem(
-//                    initials = "SJ",
-//                    name = "Sarah Johnson",
-//                    subject = "Meeting Notes",
-//                    preview = "Please find attached the minutes from",
-//                    time = "Yesterday",
-//                    backgroundColor = Color(0xFFF8F7F7),
-//                    onClick = {}
-//                )
+                if (isSearchActive) {
+                    Log.d("HomeScreen", "No search results found")
+                    Text(text = "No results found for '$searchQuery'")
+                } else {
+                    Log.d("HomeScreen", "No frequent emails found, showing static data")
+                    Text(text = "No emails found")
+                }
             }
 
-            Spacer(modifier = Modifier.height(16.dp))
+            // Show More Button - only display when not searching
+            if (!isSearchActive && frequentEmails.size > displayCount) {
+                Spacer(modifier = Modifier.height(16.dp))
 
-            // Show More Button
-            Card(
-                modifier = Modifier.fillMaxWidth(),
-                shape = RoundedCornerShape(8.dp),
-                onClick = {
-                    setDisplayCount(displayCount + maxEmailsIncrement)
-                }
-            ) {
-                Box(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .background(Color(0xFFF8F7F7))
-                        .padding(16.dp),
-                    contentAlignment = Alignment.Center
+                Card(
+                    modifier = Modifier.fillMaxWidth(),
+                    shape = RoundedCornerShape(8.dp),
+                    onClick = {
+                        setDisplayCount(displayCount + maxEmailsIncrement)
+                    }
                 ) {
-                    Text(
-                        text = if (displayCount >= frequentEmails.size) "No more emails" else "Show More ➤",
-                        color = if (displayCount >= frequentEmails.size) Color.Gray else primaryBlue,
-                        fontWeight = FontWeight.Medium
-                    )
+                    Box(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .background(Color(0xFFF8F7F7))
+                            .padding(16.dp),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Text(
+                            text = "Show More ➤",
+                            color = primaryBlue,
+                            fontWeight = FontWeight.Medium
+                        )
+                    }
                 }
             }
         }

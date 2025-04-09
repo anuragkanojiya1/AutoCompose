@@ -20,11 +20,17 @@ class FrequentEmailViewModel(application: Application) : AndroidViewModel(applic
     private val _frequentEmails = MutableStateFlow<List<Entity>>(emptyList())
     val frequentEmails: StateFlow<List<Entity>> = _frequentEmails.asStateFlow()
     
+    private val _searchResults = MutableStateFlow<List<Entity>>(emptyList())
+    val searchResults: StateFlow<List<Entity>> = _searchResults.asStateFlow()
+
+    private val _isSearchActive = MutableStateFlow(false)
+    val isSearchActive: StateFlow<Boolean> = _isSearchActive.asStateFlow()
+
     init {
         Log.d(TAG, "Initializing FrequentEmailViewModel")
         loadFrequentEmails()
     }
-    
+
     fun loadFrequentEmails(limit: Int = 10) {
         Log.d(TAG, "Loading frequent emails with limit: $limit")
         viewModelScope.launch {
@@ -40,6 +46,40 @@ class FrequentEmailViewModel(application: Application) : AndroidViewModel(applic
                 _frequentEmails.value = emptyList()
             }
         }
+    }
+
+    fun searchEmails(query: String) {
+        Log.d(TAG, "Searching emails with query: $query")
+        viewModelScope.launch {
+            try {
+                if (query.isBlank()) {
+                    _searchResults.value = emptyList()
+                    _isSearchActive.value = false
+                    return@launch
+                }
+
+                _isSearchActive.value = true
+                val lowercaseQuery = query.lowercase()
+
+                // Filter emails from the cached frequent emails
+                val filteredEmails = _frequentEmails.value.filter { email ->
+                    email.subject.lowercase().contains(lowercaseQuery) ||
+                    email.emailBody.lowercase().contains(lowercaseQuery)
+                }
+
+                Log.d(TAG, "Found ${filteredEmails.size} emails matching query: $query")
+                _searchResults.value = filteredEmails
+            } catch (e: Exception) {
+                Log.e(TAG, "Error searching emails", e)
+                _searchResults.value = emptyList()
+            }
+        }
+    }
+
+    fun clearSearch() {
+        Log.d(TAG, "Clearing search")
+        _searchResults.value = emptyList()
+        _isSearchActive.value = false
     }
     
     fun saveOrUpdateEmail(subject: String, emailBody: String) {
