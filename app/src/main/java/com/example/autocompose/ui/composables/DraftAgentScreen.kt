@@ -118,8 +118,8 @@ fun DraftAgentScreen(
             type = "message/rfc822"
             setPackage("com.google.android.gm")
             putExtra(Intent.EXTRA_EMAIL, arrayOf(recipientEmail))
-            putExtra(Intent.EXTRA_SUBJECT, emailSubject.value)
-            putExtra(Intent.EXTRA_TEXT, generatedEmail.value)
+            putExtra(Intent.EXTRA_SUBJECT, subject)
+            putExtra(Intent.EXTRA_TEXT, emailContent)
         }
     }
 
