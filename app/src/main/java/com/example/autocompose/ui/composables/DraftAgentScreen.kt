@@ -18,19 +18,17 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.sharp.Message
+import androidx.compose.material.icons.automirrored.filled.Send
 import androidx.compose.material.icons.filled.Language
 import androidx.compose.material.icons.filled.Loop
 import androidx.compose.material.icons.filled.MicNone
 import androidx.compose.material.icons.filled.Recycling
-import androidx.compose.material.icons.filled.Search
-import androidx.compose.material.icons.filled.Send
-import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
@@ -76,7 +74,13 @@ import com.example.autocompose.ui.theme.AutoComposeTheme
 import com.example.autocompose.ui.viewmodel.AutoComposeViewmodel
 import com.example.autocompose.ui.viewmodel.FrequentEmailViewModel
 import android.util.Log
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.width
+import androidx.compose.material3.HorizontalDivider
+import androidx.compose.material3.IconButtonColors
+import androidx.compose.material3.IconButtonDefaults
+import androidx.compose.material3.MaterialTheme
+import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -89,7 +93,7 @@ fun DraftAgentScreen(
     Log.d("DraftAgentScreen", "Initialized with subject: $passSubject and email content: $passEmailContent")
     val primaryBlue = Color(0xFF2196F3)
     var recipientEmail by remember { mutableStateOf("") }
-    var language by remember { mutableStateOf("en") }
+    var language by remember { mutableStateOf("English") }
     var languageExpanded by remember { mutableStateOf(false) }
     var selectedTone by remember { mutableStateOf("Professional") }
     var selectedModel by remember { mutableStateOf("DeepSeek") }
@@ -128,20 +132,28 @@ fun DraftAgentScreen(
             Column {
                 TopAppBar(
                     title = { Text("AutoCompose") },
-//                    actions = {
-//                        IconButton(onClick = { /* Settings action */ }) {
-//                            Icon(
-//                                imageVector = Icons.Default.Settings,
-//                                contentDescription = "Settings"
-//                            )
-//                        }
-//                    },
+                    actions = {
+                        IconButton(
+                            onClick = {
+                                // Delete the current email if it exists in database
+                                frequentEmailViewModel.deleteEmailByContent(subject, emailContent)
+                                // Navigate back
+                                (context as? MainActivity)?.onBackPressedDispatcher?.onBackPressed()
+                            },
+                        ) {
+                            Icon(
+                                imageVector = Icons.Default.Recycling,
+                                contentDescription = "Delete Email",
+                                tint = primaryBlue
+                            )
+                        }
+                    },
                     colors = TopAppBarDefaults.topAppBarColors(
-                        containerColor = Color.White
+                        containerColor = MaterialTheme.colorScheme.background
                     )
                 )
-                Divider(modifier = Modifier.padding(bottom = 12.dp),
-                    thickness = 1.dp,
+                HorizontalDivider(modifier = Modifier.padding(bottom = 12.dp),
+                    thickness = 0.65.dp,
                     color = Color(0xFFDCDBDB)
                 )
             }
@@ -149,7 +161,7 @@ fun DraftAgentScreen(
     ) { innerPadding ->
         Column(modifier = Modifier
             .fillMaxSize()
-            .background(Color.White)) {
+            .background(MaterialTheme.colorScheme.background)) {
             Column(
                 modifier = Modifier
                     .fillMaxSize()
@@ -174,7 +186,8 @@ fun DraftAgentScreen(
                 )
 
                 Card(
-                    modifier = Modifier.fillMaxWidth()
+                    modifier = Modifier
+                        .fillMaxWidth()
                         .border(
                             color = Color.LightGray,
                             width = 0.6.dp,
@@ -184,14 +197,17 @@ fun DraftAgentScreen(
                             shape = RoundedCornerShape(16.dp)
                         ),
                     colors = CardDefaults.cardColors(
-                        containerColor = Color.White,
+                        containerColor = MaterialTheme.colorScheme.background,
                     ),
                     elevation = CardDefaults.cardElevation(
                         defaultElevation = 8.dp
                     )
                 ) {
                     Column(
-                        modifier = Modifier.fillMaxWidth().padding(12.dp),
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .background(MaterialTheme.colorScheme.background)
+                            .padding(12.dp),
                         verticalArrangement = Arrangement.spacedBy(12.dp)
                     ) {
                         // Language row
@@ -219,19 +235,16 @@ fun DraftAgentScreen(
 
                             ExposedDropdownMenuBox(
                                 expanded = languageExpanded,
-                                onExpandedChange = { languageExpanded = !languageExpanded }
+                                onExpandedChange = { languageExpanded = !languageExpanded },
                             ) {
                                 Row(
                                     verticalAlignment = Alignment.CenterVertically,
-                                    modifier = Modifier.menuAnchor()
+                                    modifier = Modifier
+                                        .menuAnchor()
                                         .width(88.dp)
                                 ) {
                                     Text(
-                                        text = if (language == "en") "English"
-                                        else if (language == "es") "Spanish"
-                                        else if (language == "fr") "French"
-                                        else if (language == "jpn") "Japanese"
-                                        else "English",
+                                        text = language,
                                         fontWeight = FontWeight.Normal,
                                         fontSize = 16.sp
                                     )
@@ -241,33 +254,33 @@ fun DraftAgentScreen(
                                 ExposedDropdownMenu(
                                     expanded = languageExpanded,
                                     onDismissRequest = { languageExpanded = false },
-                                    modifier = Modifier.background(Color.White)
+                                    modifier = Modifier.background(MaterialTheme.colorScheme.background)
                                 ) {
                                     DropdownMenuItem(
                                         text = { Text("English") },
                                         onClick = {
-                                            language = "en"
+                                            language = "English"
                                             languageExpanded = false
                                         }
                                     )
                                     DropdownMenuItem(
                                         text = { Text("Spanish") },
                                         onClick = {
-                                            language = "es"
+                                            language = "Spanish"
                                             languageExpanded = false
                                         }
                                     )
                                     DropdownMenuItem(
                                         text = { Text("French") },
                                         onClick = {
-                                            language = "fr"
+                                            language = "French"
                                             languageExpanded = false
                                         }
                                     )
                                     DropdownMenuItem(
                                         text = { Text("Japanese") },
                                         onClick = {
-                                            language = "jpn"
+                                            language = "Japanese"
                                             languageExpanded = false
                                         }
                                     )
@@ -296,7 +309,8 @@ fun DraftAgentScreen(
                                     colors = FilterChipDefaults.filterChipColors(
                                         selectedContainerColor = primaryBlue,
                                         selectedLabelColor = Color.White,
-                                        containerColor = Color(0xFFF8F7F7)
+                                        containerColor = Color(0xFFF8F7F7),
+                                        labelColor = Color.Black,
                                     ),
                                     shape = RoundedCornerShape(20.dp),
                                     modifier = Modifier.weight(1f)
@@ -324,7 +338,8 @@ fun DraftAgentScreen(
                                     colors = FilterChipDefaults.filterChipColors(
                                         selectedContainerColor = primaryBlue,
                                         selectedLabelColor = Color.White,
-                                        containerColor = Color(0xFFF8F7F7)
+                                        containerColor = Color(0xFFF8F7F7),
+                                        labelColor = Color.Black,
                                     ),
                                     shape = RoundedCornerShape(8.dp),
                                     modifier = Modifier
@@ -394,7 +409,7 @@ fun DraftAgentScreen(
                         .heightIn(min = 200.dp),
                     shape = RoundedCornerShape(16.dp),
                     colors = CardDefaults.cardColors(
-                        containerColor = Color(0xFFFAF7F7)
+                        containerColor = MaterialTheme.colorScheme.surfaceContainer
                     )
                 ) {
                     OutlinedTextField(
@@ -406,7 +421,7 @@ fun DraftAgentScreen(
                         },
                         textStyle = TextStyle(
                             fontSize = 20.sp,
-                            color = Color.Black,
+                            color = MaterialTheme.colorScheme.onSurface,
                             fontFamily = FontFamily.Serif,
                         ),
                         modifier = Modifier
@@ -418,8 +433,8 @@ fun DraftAgentScreen(
                             unfocusedTextColor = Color.Gray,
                             unfocusedBorderColor = Color.Gray,
                             focusedBorderColor = Color.DarkGray,
-                            focusedTextColor = Color.Black
-                        ),
+                            focusedTextColor = MaterialTheme.colorScheme.onSurface,
+                            containerColor = MaterialTheme.colorScheme.surfaceContainer                        ),
                         shape = RoundedCornerShape(16.dp),
                     )
                 }
@@ -535,10 +550,11 @@ fun DraftAgentScreen(
                             verticalAlignment = Alignment.CenterVertically
                         ) {
                             Icon(
-                                imageVector = Icons.Filled.Send,
+                                imageVector = Icons.AutoMirrored.Filled.Send,
+                                tint = Color.White,
                                 contentDescription = "Send"
                             )
-                            Text("Send")
+                            Text("Send", color = Color.White)
                         }
                     }
                 }

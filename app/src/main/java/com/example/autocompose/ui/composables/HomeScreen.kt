@@ -16,6 +16,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.paddingFromBaseline
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -24,12 +25,18 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Clear
 import androidx.compose.material.icons.filled.Close
+import androidx.compose.material.icons.filled.Delete
+import androidx.compose.material.icons.filled.Home
+import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.filled.Search
+import androidx.compose.material.icons.filled.TrendingUp
+import androidx.compose.material3.BottomAppBar
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.Divider
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -63,6 +70,7 @@ import com.airbnb.lottie.compose.animateLottieCompositionAsState
 import com.airbnb.lottie.compose.rememberLottieComposition
 import com.example.autocompose.ui.viewmodel.FrequentEmailViewModel
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.text.style.TextAlign
 import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
 import com.example.autocompose.R
@@ -119,7 +127,8 @@ fun HomeScreen(
                                 value = searchQuery,
                                 onValueChange = { handleSearch(it) },
                                 placeholder = { Text("Search emails...") },
-                                modifier = Modifier.fillMaxWidth()
+                                modifier = Modifier
+                                    .fillMaxWidth()
                                     .padding(end = 16.dp)
                                     .align(Alignment.CenterHorizontally),
                                 trailingIcon = {
@@ -159,22 +168,61 @@ fun HomeScreen(
                         }
                     },
                     colors = TopAppBarDefaults.topAppBarColors(
-                        containerColor = Color.White
+                        containerColor = MaterialTheme.colorScheme.background
                     )
                 )
-                Divider(
-                    modifier = Modifier.padding(bottom = 12.dp),
-                    thickness = 1.dp,
+                HorizontalDivider(
+                    modifier = Modifier
+                        .padding(bottom = 12.dp),
+                    thickness = 0.65.dp,
                     color = Color(0xFFDCDBDB)
                 )
             }
+        },
+        bottomBar = {
+            BottomAppBar(
+                actions = {
+                    Box(
+                        modifier = Modifier.fillMaxWidth(),
+                        contentAlignment = Alignment.Center,
+                    ) {
+                        Row(
+                            horizontalArrangement = Arrangement.Center,
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            IconButton(
+                                onClick = { navController.navigate(Screen.Home.route) },
+                                modifier = Modifier
+                                    .weight(0.5f)
+                                    .size(64.dp),
+                            ) {
+                                Icon(Icons.Default.Home, contentDescription = "Home",
+                                    modifier = Modifier.size(32.dp)
+                                )
+                            }
+
+                            Spacer(modifier = Modifier.width(32.dp))
+
+                            IconButton(onClick = { navController.navigate(Screen.Analytics.route) },
+                                modifier = Modifier
+                                    .weight(0.5f)
+                                    .size(64.dp)
+                            ) {
+                                Icon(Icons.Default.TrendingUp, contentDescription = "Trends",
+                                    modifier = Modifier.size(32.dp)
+                                )
+                            }
+                        }
+                    }
+                }
+            )
         },
         modifier = Modifier.background(color = Color.White)
     ) { innerPadding ->
         Column(
             modifier = Modifier
                 .fillMaxSize()
-                .background(Color.White)
+                .background(MaterialTheme.colorScheme.background)
                 .verticalScroll(rememberScrollState())
                 .padding(innerPadding)
                 .padding(16.dp)
@@ -184,18 +232,18 @@ fun HomeScreen(
                     modifier = Modifier
                         .fillMaxWidth()
                         .align(Alignment.CenterHorizontally)
-                        .background(color = Color.White),
+                        .background(color = MaterialTheme.colorScheme.background),
                     color = MaterialTheme.colorScheme.background
                 ) {
                     Box(modifier = Modifier
                         .fillMaxWidth()
-                        .background(color = Color.White)
+                        .background(color = MaterialTheme.colorScheme.background)
                     ) {
                         Animation(
                             modifier = Modifier
-                            .size(240.dp, 240.dp)
-                            .align(Alignment.Center)
-                            .background(Color.White)
+                                .size(240.dp, 240.dp)
+                                .align(Alignment.Center)
+                                .background(MaterialTheme.colorScheme.background)
                                 .padding(bottom = 8.dp)
                             // .scale(scaleX = 1.3f, scaleY = 1.6f)
                         )
@@ -227,11 +275,31 @@ fun HomeScreen(
             }
 
             // Title Section
-            Text(
-                text = if (isSearchActive) "Search Results" else "Recent Emails",
-                fontSize = 18.sp,
-                fontWeight = FontWeight.Medium
-            )
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Text(
+                    text = if (isSearchActive) "Search Results" else "Recent Emails",
+                    fontSize = 18.sp,
+                    fontWeight = FontWeight.Medium
+                )
+
+                if (!isSearchActive && frequentEmails.isNotEmpty()) {
+                    IconButton(
+                        onClick = {
+                            frequentEmailViewModel.clearAllFrequentEmails()
+                        }
+                    ) {
+                        Icon(
+                            imageVector = Icons.Default.Delete,
+                            contentDescription = "Delete all emails",
+                            tint = primaryBlue
+                        )
+                    }
+                }
+            }
 
             Spacer(modifier = Modifier.height(16.dp))
 
@@ -330,14 +398,16 @@ fun EmailItem(
         modifier = Modifier
             .fillMaxWidth()
             .clickable(onClick = onClick)
-            .padding(vertical = 12.dp),
+            .padding(vertical = 16.dp),
         verticalAlignment = Alignment.Top,
+        horizontalArrangement = Arrangement.spacedBy(4.dp)
     ) {
         // Avatar with initials
         Box(
             modifier = Modifier
                 .size(40.dp)
                 .clip(CircleShape)
+                .align(Alignment.Top)
                 .background(backgroundColor),
             contentAlignment = Alignment.Center
         ) {
@@ -355,12 +425,13 @@ fun EmailItem(
         ) {
             Row(
                 modifier = Modifier.fillMaxWidth(),
-                verticalAlignment = Alignment.CenterVertically
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(16.dp)
             ) {
                 Text(
-                    text = name,
-                    fontWeight = FontWeight.SemiBold,
-                    fontSize = 16.sp
+                    text = subject,
+                    fontWeight = FontWeight.Medium,
+                    fontSize = 14.sp,
                 )
 
                 Spacer(modifier = Modifier.weight(1f))
@@ -371,12 +442,6 @@ fun EmailItem(
                     fontSize = 12.sp
                 )
             }
-
-            Text(
-                text = subject,
-                fontWeight = FontWeight.Medium,
-                fontSize = 14.sp
-            )
 
             Text(
                 text = preview,
