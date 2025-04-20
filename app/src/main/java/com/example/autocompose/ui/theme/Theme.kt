@@ -9,28 +9,41 @@ import androidx.compose.material3.dynamicDarkColorScheme
 import androidx.compose.material3.dynamicLightColorScheme
 import androidx.compose.material3.lightColorScheme
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 
 private val DarkColorScheme = darkColorScheme(
-    primary = Purple80,
-    secondary = PurpleGrey80,
-    tertiary = Pink80
-)
-
-private val LightColorScheme = lightColorScheme(
-    primary = Purple40,
-    secondary = PurpleGrey40,
-    tertiary = Pink40
-
-    /* Other default colors to override
-    background = Color(0xFFFFFBFE),
-    surface = Color(0xFFFFFBFE),
+    primary = Color(0xFF2196F3),
+    secondary = Color(0xFF303030),
+    tertiary = Color(0xFF464646),
+    background = Color.Black,
+    surface = Color(0xFF121212),
     onPrimary = Color.White,
     onSecondary = Color.White,
     onTertiary = Color.White,
+    onBackground = Color.White,
+    surfaceContainer = Color(0xFF4D4C4C),
+    onSurface = Color.White,
+    surfaceBright = Color.White,
+    surfaceTint = Color.White
+)
+
+private val LightColorScheme = lightColorScheme(
+    primary = Color(0xFF2196F3),
+    secondary = Color.White,
+    tertiary = Color(0xFF03A9F4),
+    background = Color.White,
+//    background = Color(0xFFFFFBFE),
+    surface = Color(0xFFFFFBFE),
+    onPrimary = Color.White,
+    onSecondary = Color(0xFF000000),
+    onTertiary = Color.White,
     onBackground = Color(0xFF1C1B1F),
     onSurface = Color(0xFF1C1B1F),
-    */
+    surfaceContainer = Color(0xFFF8F7F7),
+    surfaceVariant = Color(0xFFEEEEEE),
+    surfaceBright = Color.Black,
+    surfaceTint = Color.Black
 )
 
 @Composable
@@ -45,7 +58,6 @@ fun AutoComposeTheme(
             val context = LocalContext.current
             if (darkTheme) dynamicDarkColorScheme(context) else dynamicLightColorScheme(context)
         }
-
         darkTheme -> DarkColorScheme
         else -> LightColorScheme
     }
