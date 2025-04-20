@@ -125,4 +125,35 @@ class FrequentEmailViewModel(application: Application) : AndroidViewModel(applic
             }
         }
     }
+
+    fun deleteEmail(emailId: Int) {
+        Log.d(TAG, "Deleting email with ID: $emailId")
+        viewModelScope.launch {
+            try {
+                emailDao.deleteEmail(emailId)
+                Log.d(TAG, "Email deleted successfully")
+                // Refresh the frequent emails list
+                loadFrequentEmails()
+            } catch (e: Exception) {
+                Log.e(TAG, "Error deleting email", e)
+            }
+        }
+    }
+
+    fun deleteEmailByContent(subject: String, emailBody: String) {
+        Log.d(TAG, "Attempting to delete email with subject: $subject")
+        viewModelScope.launch {
+            try {
+                val existingEmail = emailDao.findEmail(subject, emailBody)
+                if (existingEmail != null) {
+                    Log.d(TAG, "Found email with ID: ${existingEmail.id}, deleting...")
+                    deleteEmail(existingEmail.id)
+                } else {
+                    Log.d(TAG, "Email not found in database")
+                }
+            } catch (e: Exception) {
+                Log.e(TAG, "Error deleting email by content", e)
+            }
+        }
+    }
 }

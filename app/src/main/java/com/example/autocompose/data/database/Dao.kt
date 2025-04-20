@@ -25,4 +25,7 @@ interface Dao {
     
     @Query("SELECT * FROM emails ORDER BY frequency DESC LIMIT :limit")
     suspend fun getMostFrequentEmails(limit: Int): List<Entity>
+
+    @Query("DELETE FROM emails WHERE id = :id")
+    suspend fun deleteEmail(id: Int)
 }
