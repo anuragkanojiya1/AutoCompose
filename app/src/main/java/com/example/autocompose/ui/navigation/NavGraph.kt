@@ -1,10 +1,15 @@
 package com.example.autocompose.ui.navigation
 
 import android.app.Application
+import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
+import androidx.compose.animation.scaleIn
+import androidx.compose.animation.scaleOut
 import androidx.compose.animation.slideInHorizontally
+import androidx.compose.animation.slideInVertically
 import androidx.compose.animation.slideOutHorizontally
+import androidx.compose.animation.slideOutVertically
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.platform.LocalContext
 import androidx.navigation.NavController
@@ -15,6 +20,7 @@ import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
 import com.example.autocompose.SplashScreen
 import com.example.autocompose.ui.composables.AgentScreen
+import com.example.autocompose.ui.composables.AnalyticsScreen
 import com.example.autocompose.ui.composables.DraftAgentScreen
 import com.example.autocompose.ui.composables.HomeScreen
 import com.example.autocompose.ui.viewmodel.AutoComposeViewmodel
@@ -31,8 +37,13 @@ fun NavGraph(navController: NavController,
 
     NavHost(navController, startDestination = Screen.Splash.route) {
         composable(Screen.Home.route,
-            enterTransition = { slideInHorizontally(initialOffsetX = { it }) + fadeIn() },
-            exitTransition = { slideOutHorizontally(targetOffsetX = { -it }) + fadeOut() }) {
+            enterTransition = {
+                slideInHorizontally(initialOffsetX = { it }, animationSpec = tween(600)) + fadeIn()
+            },
+            exitTransition = {
+                slideOutHorizontally(targetOffsetX = { -it }, animationSpec = tween(600)) + fadeOut()
+            }
+        ) {
             HomeScreen(
                 frequentEmailViewModel = frequentEmailViewModel,
                 application = application,
@@ -40,9 +51,20 @@ fun NavGraph(navController: NavController,
             )
         }
         composable(Screen.AgentScreen.route,
-            enterTransition = { slideInHorizontally(initialOffsetX = { it }) + fadeIn() },
-            exitTransition = { slideOutHorizontally(targetOffsetX = { -it }) + fadeOut() }) {
+            enterTransition = {
+                slideInVertically(initialOffsetY = { it }, animationSpec = tween(500)) + fadeIn()
+            },
+            exitTransition = {
+                slideOutVertically(targetOffsetY = { it }, animationSpec = tween(500)) + fadeOut()
+            }
+        ) {
             AgentScreen(autoComposeViewmodel, frequentEmailViewModel)
+        }
+        composable(Screen.Analytics.route,
+            enterTransition = { fadeIn(animationSpec = tween(700)) },
+            exitTransition = { fadeOut(animationSpec = tween(700)) }
+        ) {
+            AnalyticsScreen(autoComposeViewmodel, navController)
         }
         composable(
             route = Screen.DraftAgentScreen.route,
@@ -50,8 +72,12 @@ fun NavGraph(navController: NavController,
                 navArgument("subject") { type = NavType.StringType },
                 navArgument("emailBody") { type = NavType.StringType }
             ),
-            enterTransition = { slideInHorizontally(initialOffsetX = { it }) + fadeIn() },
-            exitTransition = { slideOutHorizontally(targetOffsetX = { -it }) + fadeOut() }
+            enterTransition = {
+                scaleIn(initialScale = 0.8f, animationSpec = tween(500)) + fadeIn()
+            },
+            exitTransition = {
+                scaleOut(targetScale = 1.2f, animationSpec = tween(500)) + fadeOut()
+            }
         ) { backStackEntry ->
             val subject = backStackEntry.arguments?.getString("subject") ?: ""
             val emailBody = backStackEntry.arguments?.getString("emailBody") ?: ""
@@ -63,8 +89,12 @@ fun NavGraph(navController: NavController,
         }
         composable(
             route = Screen.SettingsScreen.route,
-            enterTransition = { slideInHorizontally(initialOffsetX = { it }) + fadeIn() },
-            exitTransition = { slideOutHorizontally(targetOffsetX = { -it }) + fadeOut() }
+            enterTransition = {
+                slideInHorizontally(initialOffsetX = { -it }, animationSpec = tween(600)) + fadeIn()
+            },
+            exitTransition = {
+                slideOutHorizontally(targetOffsetX = { it }, animationSpec = tween(600)) + fadeOut()
+            }
         ){
         }
 
