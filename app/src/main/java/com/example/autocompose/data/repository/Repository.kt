@@ -2,6 +2,7 @@ package com.example.autocompose.data.repository
 
 import com.example.autocompose.data.api.ApiInstance
 import com.example.autocompose.data.database.AppDatabase
+import com.example.autocompose.domain.model.AnalyticsResponse
 import com.example.autocompose.domain.model.BackendResponse
 import com.example.autocompose.domain.model.Model
 import kotlinx.coroutines.Dispatchers
@@ -29,6 +30,22 @@ class Repository {
                 api.apiCall(request).execute()
             }
             
+            if (response.isSuccessful && response.body() != null) {
+                Result.success(response.body()!!)
+            } else {
+                Result.failure(Exception("Error: ${response.errorBody()?.string() ?: "Unknown error"}"))
+            }
+        } catch (e: Exception) {
+            Result.failure(e)
+        }
+    }
+
+    suspend fun getTrends() : Result<AnalyticsResponse> {
+        return try {
+            val response = withContext(Dispatchers.IO) {
+                api.getTrending().execute()
+            }
+
             if (response.isSuccessful && response.body() != null) {
                 Result.success(response.body()!!)
             } else {
