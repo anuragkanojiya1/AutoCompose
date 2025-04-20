@@ -68,16 +68,12 @@ dependencies {
     ksp("androidx.room:room-compiler:$room_version")
     implementation("com.squareup.okhttp3:okhttp:4.12.0")
 
-    // optional - Kotlin Extensions and Coroutines support for Room
     implementation("androidx.room:room-ktx:$room_version")
     implementation("androidx.compose.material:material-icons-extended:1.7.5")
     implementation("com.airbnb.android:lottie-compose:6.6.4")
-    
-    // ViewModel with Compose integration
+
     implementation("androidx.lifecycle:lifecycle-viewmodel-compose:2.8.7")
-    // Navigation Compose
-
     val nav_version = "2.8.9"
-
     implementation("androidx.navigation:navigation-compose:$nav_version")
+    implementation("com.patrykandpatrick.vico:compose:1.12.0")
 }
