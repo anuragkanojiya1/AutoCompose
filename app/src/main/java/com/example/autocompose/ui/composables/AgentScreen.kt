@@ -18,6 +18,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -42,6 +43,7 @@ import androidx.compose.material3.ExposedDropdownMenuBox
 import androidx.compose.material3.ExposedDropdownMenuDefaults
 import androidx.compose.material3.FilterChip
 import androidx.compose.material3.FilterChipDefaults
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.OutlinedTextField
@@ -76,9 +78,7 @@ import com.example.autocompose.ui.theme.AutoComposeTheme
 import com.example.autocompose.ui.viewmodel.AutoComposeViewmodel
 import com.example.autocompose.ui.viewmodel.FrequentEmailViewModel
 import android.util.Log
-import androidx.compose.foundation.layout.IntrinsicSize
-import androidx.compose.foundation.layout.width
-import androidx.compose.material3.HorizontalDivider
+import androidx.compose.material3.MaterialTheme
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -88,7 +88,7 @@ fun AgentScreen(
 ) {
     val primaryBlue = Color(0xFF2196F3)
     var recipientEmail by remember { mutableStateOf("") }
-    var language by remember { mutableStateOf("en") }
+    var language by remember { mutableStateOf("English") }
     var languageExpanded by remember { mutableStateOf(false) }
     var selectedTone by remember { mutableStateOf("Professional") }
     var selectedModel by remember { mutableStateOf("Llama") }
@@ -142,11 +142,11 @@ fun AgentScreen(
 //                        }
 //                    },
                     colors = TopAppBarDefaults.topAppBarColors(
-                        containerColor = Color.White
+                        containerColor = MaterialTheme.colorScheme.background
                     )
                 )
                 HorizontalDivider(modifier = Modifier.padding(bottom = 12.dp),
-                    thickness = 1.dp,
+                    thickness = 0.65.dp,
                     color = Color(0xFFDCDBDB)
                 )
             }
@@ -154,7 +154,7 @@ fun AgentScreen(
     ) { innerPadding ->
         Column(modifier = Modifier
             .fillMaxSize()
-            .background(Color.White)) {
+            .background(MaterialTheme.colorScheme.background)) {
             Column(
                 modifier = Modifier
                     .fillMaxSize()
@@ -163,7 +163,6 @@ fun AgentScreen(
                     .verticalScroll(rememberScrollState()),
                 verticalArrangement = Arrangement.spacedBy(16.dp)
             ) {
-                // Recipient email field
                 OutlinedTextField(
                     value = recipientEmail,
                     onValueChange = { recipientEmail = it },
@@ -179,7 +178,8 @@ fun AgentScreen(
                 )
 
                 Card(
-                    modifier = Modifier.fillMaxWidth()
+                    modifier = Modifier
+                        .fillMaxWidth()
                         .border(
                             color = Color.LightGray,
                             width = 0.6.dp,
@@ -189,14 +189,17 @@ fun AgentScreen(
                             shape = RoundedCornerShape(16.dp)
                         ),
                     colors = CardDefaults.cardColors(
-                        containerColor = Color.White,
+                        containerColor = MaterialTheme.colorScheme.background,
                     ),
                     elevation = CardDefaults.cardElevation(
                         defaultElevation = 8.dp
                     )
                 ) {
                     Column(
-                        modifier = Modifier.fillMaxWidth().padding(12.dp),
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .background(MaterialTheme.colorScheme.background)
+                            .padding(12.dp),
                         verticalArrangement = Arrangement.spacedBy(12.dp)
                     ) {
                         // Language row
@@ -228,15 +231,12 @@ fun AgentScreen(
                             ) {
                                 Row(
                                     verticalAlignment = Alignment.CenterVertically,
-                                    modifier = Modifier.menuAnchor()
+                                    modifier = Modifier
+                                        .menuAnchor()
                                         .width(88.dp)
                                 ) {
                                     Text(
-                                        text = if (language == "en") "English"
-                                        else if (language == "es") "Spanish"
-                                        else if (language == "fr") "French"
-                                        else if (language == "jpn") "Japanese"
-                                        else "English",
+                                        text = language,
                                         fontWeight = FontWeight.Normal,
                                         fontSize = 16.sp
                                     )
@@ -246,33 +246,33 @@ fun AgentScreen(
                                 ExposedDropdownMenu(
                                     expanded = languageExpanded,
                                     onDismissRequest = { languageExpanded = false },
-                                    modifier = Modifier.background(Color.White)
+                                    modifier = Modifier.background(MaterialTheme.colorScheme.background)
                                 ) {
                                     DropdownMenuItem(
                                         text = { Text("English") },
                                         onClick = {
-                                            language = "en"
+                                            language = "English"
                                             languageExpanded = false
                                         }
                                     )
                                     DropdownMenuItem(
                                         text = { Text("Spanish") },
                                         onClick = {
-                                            language = "es"
+                                            language = "Spanish"
                                             languageExpanded = false
                                         }
                                     )
                                     DropdownMenuItem(
                                         text = { Text("French") },
                                         onClick = {
-                                            language = "fr"
+                                            language = "French"
                                             languageExpanded = false
                                         }
                                     )
                                     DropdownMenuItem(
                                         text = { Text("Japanese") },
                                         onClick = {
-                                            language = "jpn"
+                                            language = "Japanese"
                                             languageExpanded = false
                                         }
                                     )
@@ -301,7 +301,8 @@ fun AgentScreen(
                                     colors = FilterChipDefaults.filterChipColors(
                                         selectedContainerColor = primaryBlue,
                                         selectedLabelColor = Color.White,
-                                        containerColor = Color(0xFFF8F7F7)
+                                        containerColor = Color(0xFFF8F7F7),
+                                        labelColor = Color.Black,
                                     ),
                                     shape = RoundedCornerShape(20.dp),
                                     modifier = Modifier.weight(1f)
@@ -329,7 +330,8 @@ fun AgentScreen(
                                     colors = FilterChipDefaults.filterChipColors(
                                         selectedContainerColor = primaryBlue,
                                         selectedLabelColor = Color.White,
-                                        containerColor = Color(0xFFF8F7F7)
+                                        containerColor = Color(0xFFF8F7F7),
+                                        labelColor = Color.Black,
                                     ),
                                     shape = RoundedCornerShape(8.dp),
                                     modifier = Modifier
@@ -360,7 +362,7 @@ fun AgentScreen(
                     Button(
                         onClick = {
                             speechContext.askSpeechInput(context)
-                                  },
+                        },
                         modifier = Modifier.size(64.dp),
                         shape = CircleShape,
                         colors = ButtonDefaults.buttonColors(
@@ -395,9 +397,10 @@ fun AgentScreen(
                     modifier = Modifier
                         .fillMaxWidth()
                         .heightIn(min = 200.dp),
-                    shape = RoundedCornerShape(16.dp),
+                    shape = RoundedCornerShape(24.dp),
                     colors = CardDefaults.cardColors(
-                        containerColor = Color(0xFFFAF7F7)
+                        containerColor = MaterialTheme.colorScheme.surfaceContainer
+                        //Color(0xFFF8F7F7)
                     )
                 ) {
                     OutlinedTextField(
@@ -409,7 +412,7 @@ fun AgentScreen(
                         },
                         textStyle = TextStyle(
                             fontSize = 20.sp,
-                            color = Color.Black,
+                            color = MaterialTheme.colorScheme.onSurface,
                             fontFamily = FontFamily.Serif,
                         ),
                         modifier = Modifier
@@ -421,7 +424,8 @@ fun AgentScreen(
                             unfocusedTextColor = Color.Gray,
                             unfocusedBorderColor = Color.Gray,
                             focusedBorderColor = Color.DarkGray,
-                            focusedTextColor = Color.Black
+                            focusedTextColor = MaterialTheme.colorScheme.onSurface,
+                            containerColor = MaterialTheme.colorScheme.surfaceContainer
                         ),
                         shape = RoundedCornerShape(16.dp),
                     )
@@ -444,7 +448,8 @@ fun AgentScreen(
                     modifier = Modifier.fillMaxWidth(),
                     colors = ButtonDefaults.buttonColors(
                         containerColor = primaryBlue
-                    )
+                    ),
+                    shape = RoundedCornerShape(24.dp)
                 ) {
                     Row(
                         horizontalArrangement = Arrangement.spacedBy(8.dp),
@@ -452,9 +457,10 @@ fun AgentScreen(
                     ) {
                         Icon(
                             imageVector = Icons.Filled.Loop,
+                            tint = Color.White,
                             contentDescription = "Generate Email"
                         )
-                        Text("Generate")
+                        Text("Generate", color = Color.White)
                     }
                 }
 
@@ -472,15 +478,12 @@ fun AgentScreen(
                                     subject = emailSubject.value,
                                     emailBody = generatedEmail.value
                                 )
-                                Log.d("AgentScreen", "Sending email with subject: '${emailSubject.value}'")
+                                Log.d("AgentScreen", "Saving email: '${emailSubject.value}'")
                                 Log.d("AgentScreen", "Updated frequency in database")
-                                context.startActivity(createEmailIntent())
-                            } catch (e: ActivityNotFoundException) {
-                                Log.e("AgentScreen", "Gmail app not installed!", e)
-                                Toast.makeText(context, "Gmail app not installed!", Toast.LENGTH_SHORT).show()
+//                                context.startActivity(createEmailIntent())
                             } catch (e: Exception) {
-                                Log.e("AgentScreen", "Error sending email", e)
-                                Toast.makeText(context, "Error sending email: ${e.message}", Toast.LENGTH_SHORT).show()
+                                Log.e("AgentScreen", "Error saving email", e)
+                                Toast.makeText(context, "Error saving email: ${e.message}", Toast.LENGTH_SHORT).show()
                             }
                             else
                                 Toast.makeText(context, "Please generate subject and email content", Toast.LENGTH_SHORT).show()
@@ -491,6 +494,7 @@ fun AgentScreen(
                             contentColor = Color.Black,
                         ),
                         border = BorderStroke(1.dp, Color(0xFF2196F3)),
+                        shape = RoundedCornerShape(24.dp)
                     ) {
                         Row(
                             horizontalArrangement = Arrangement.spacedBy(8.dp),
@@ -530,7 +534,8 @@ fun AgentScreen(
                         modifier = Modifier.weight(1f),
                         colors = ButtonDefaults.buttonColors(
                             containerColor = primaryBlue
-                        )
+                        ),
+                        shape = RoundedCornerShape(24.dp)
                     ) {
                         Row(
                             horizontalArrangement = Arrangement.spacedBy(8.dp),
@@ -538,9 +543,10 @@ fun AgentScreen(
                         ) {
                             Icon(
                                 imageVector = Icons.Filled.Send,
+                                tint = Color.White,
                                 contentDescription = "Send"
                             )
-                            Text("Send")
+                            Text("Send", color = Color.White)
                         }
                     }
                 }
