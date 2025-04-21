@@ -20,6 +20,7 @@ AutoCompose is an intelligent email agent built for speed, multilingual fluency,
 - Frequently sent emails are automatically saved as **smart drafts**.
 - Stored locally via **Room Database** for **offline access** and reusability.
 - Quickly edit and reuse previous emails without retyping them.
+- 🔍 **Search bar available** to easily find your saved drafts by keyword or content.
 
 ### 📤 Gmail Integration
 - Directly **send generated emails via Gmail** without leaving the app.
@@ -37,6 +38,7 @@ AutoCompose is an intelligent email agent built for speed, multilingual fluency,
 - Built using **Jetpack Compose** for a modern, clean, and fast experience.
 - UI adapts to user context with language and tone selectors.
 - Includes a **chat-like interface** for AI interactions.
+- 🌗 **Supports both Light and Dark Mode** for a comfortable viewing experience.
 
 ---
 
@@ -65,6 +67,8 @@ AutoCompose is an intelligent email agent built for speed, multilingual fluency,
 - **Voice Input**: Android Speech-to-Text
 - **AI Integration**: Gemini, Groq (Mistral, LLama)
 - **Realtime Analytics**: Supabase Realtime + Dashboard UI
+- **Dark Mode Support**: Jetpack Compose `MaterialTheme` adaptive theming
+- **Search Functionality**: Draft filtering via search bar
 
 ### 🧪 AI/Backend
 - **Backend Framework**: FastAPI
