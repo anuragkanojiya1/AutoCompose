@@ -25,6 +25,14 @@ AutoCompose is an intelligent email agent built for speed, multilingual fluency,
 - Directly **send generated emails via Gmail** without leaving the app.
 - Uses Android **Intent system** for seamless one-tap dispatch.
 
+### 📊 Trends Dashboard (Powered by Supabase)
+- Real-time tracking of:
+  - Most **used AI models** (Gemini, Mistral, Llama, etc.)
+  - **Global languages** selected by users
+  - **Tone preferences** (formal, friendly, professional)
+- Built using **Supabase Realtime** + custom analytics endpoint.
+- Accessible in a dedicated **dashboard tab** within the app to show what’s trending globally.
+
 ### 🎯 Fast, Minimal UI
 - Built using **Jetpack Compose** for a modern, clean, and fast experience.
 - UI adapts to user context with language and tone selectors.
@@ -37,6 +45,8 @@ AutoCompose is an intelligent email agent built for speed, multilingual fluency,
 <img src="https://github.com/user-attachments/assets/a1263b49-0c22-427a-a953-41e1b9b0f12e" alt="Screenshot_20250408_183741" width="250"/>
 <img src="https://github.com/user-attachments/assets/446c877e-57b4-4f85-b40a-51c7b86fd7a7" alt="Screenshot_20250408_183942" width="250"/>
 <img src="https://github.com/user-attachments/assets/07af1e86-3961-4ce4-bec0-487748bb6de2" alt="Screenshot_20250408_183957" width="250"/>
+<img src="https://github.com/user-attachments/assets/230afb94-613f-4a06-936b-168bb106844a" alt="Screenshot_20250421_004851" width="250"/>
+<img src="https://github.com/user-attachments/assets/c62e6d44-60b9-4b7c-8328-85424b973531" alt="Screenshot_20250421_004903" width="250"/>
 
 ## 🗄️Backend info
 - [**Dev.to post**](https://dev.to/anuragkanojiya/how-to-use-langgraph-within-a-fastapi-backend-amm)
@@ -54,6 +64,7 @@ AutoCompose is an intelligent email agent built for speed, multilingual fluency,
 - **Local Storage**: Room Database
 - **Voice Input**: Android Speech-to-Text
 - **AI Integration**: Gemini, Groq (Mistral, LLama)
+- **Realtime Analytics**: Supabase Realtime + Dashboard UI
 
 ### 🧪 AI/Backend
 - **Backend Framework**: FastAPI
@@ -81,6 +92,7 @@ Frontend (Android - Kotlin)
 Backend (Python - FastAPI)
  ├── LangGraph for flow orchestration
  ├── Gemini + Groq models (Gemini, Mistral, Llama)
+ ├── Supabase DB integration for trend tracking
  └── Deployed via Railway
 ```
 
