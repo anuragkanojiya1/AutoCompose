@@ -70,6 +70,8 @@ import com.airbnb.lottie.compose.animateLottieCompositionAsState
 import com.airbnb.lottie.compose.rememberLottieComposition
 import com.example.autocompose.ui.viewmodel.FrequentEmailViewModel
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.style.TextAlign
 import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
@@ -131,6 +133,11 @@ fun HomeScreen(
                                     .fillMaxWidth()
                                     .padding(end = 16.dp)
                                     .align(Alignment.CenterHorizontally),
+                                textStyle = TextStyle(
+                                    fontSize = 20.sp,
+                                    color = MaterialTheme.colorScheme.onSurface,
+                                    fontFamily = FontFamily.Default,
+                                ),
                                 trailingIcon = {
                                     IconButton(onClick = {
                                         showSearchBar = false
@@ -146,10 +153,17 @@ fun HomeScreen(
                                 singleLine = true,
                                 colors = TextFieldDefaults.outlinedTextFieldColors(
                                     unfocusedTextColor = Color.Gray,
-                                    unfocusedBorderColor = Color(0xFFE7E6E6),
-                                    focusedBorderColor = Color(0xFFE7E6E6)
-                                ),
-                                shape = RoundedCornerShape(12.dp),
+                                    unfocusedBorderColor = Color.Gray,
+                                    focusedBorderColor = Color.DarkGray,
+                                    focusedTextColor = MaterialTheme.colorScheme.onSurface,
+                                    containerColor = MaterialTheme.colorScheme.surfaceContainer                        ),
+                                shape = RoundedCornerShape(16.dp),
+//                                colors = TextFieldDefaults.outlinedTextFieldColors(
+//                                    unfocusedTextColor = Color.Gray,
+//                                    unfocusedBorderColor = Color(0xFFE7E6E6),
+//                                    focusedBorderColor = Color(0xFFE7E6E6)
+//                                ),
+//                                shape = RoundedCornerShape(12.dp),
                                 )
                         } else {
                             Text("AutoCompose")
