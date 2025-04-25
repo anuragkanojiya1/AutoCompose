@@ -102,7 +102,7 @@ Backend (Python - FastAPI)
 
 ## 📦 Installation & Setup
 
-1. Download the app directly from apk: [apk.zip](https://github.com/user-attachments/files/19651040/apk.zip)
+1. Download the app directly from apk: [apk.zip](https://github.com/user-attachments/files/19911786/apk.zip)
 2. Clone the Android project.
 - Open in Android Studio.
 - Run on emulator or device.
