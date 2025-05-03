@@ -54,7 +54,7 @@ AutoCompose is an intelligent email agent built for speed, multilingual fluency,
 - [**Dev.to post**](https://dev.to/anuragkanojiya/how-to-use-langgraph-within-a-fastapi-backend-amm)
 
 ## 🚀Demo
-- [**Youtube Link**](https://www.youtube.com/watch?v=JNPY4eGm26U&t=81s&ab_channel=AnuragKanojiya)
+- [**Youtube Link**](https://youtu.be/JNPY4eGm26U)
 
 ## 🧰 Tech Stack
 
