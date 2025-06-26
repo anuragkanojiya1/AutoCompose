@@ -3,6 +3,7 @@ plugins {
     alias(libs.plugins.kotlin.android)
     alias(libs.plugins.kotlin.compose)
     id("com.google.devtools.ksp")
+    alias(libs.plugins.google.gms.google.services)
 
 }
 
@@ -39,6 +40,7 @@ android {
     buildFeatures {
         compose = true
     }
+
 }
 
 dependencies {
@@ -51,6 +53,10 @@ dependencies {
     implementation(libs.androidx.ui.graphics)
     implementation(libs.androidx.ui.tooling.preview)
     implementation(libs.androidx.material3)
+    implementation(libs.firebase.auth)
+    implementation(libs.androidx.credentials)
+    implementation(libs.androidx.credentials.play.services.auth)
+    implementation(libs.googleid)
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
@@ -76,4 +82,13 @@ dependencies {
     val nav_version = "2.8.9"
     implementation("androidx.navigation:navigation-compose:$nav_version")
     implementation("com.patrykandpatrick.vico:compose:1.12.0")
+    implementation("com.paypal.android:paypal-web-payments:2.0.0")
+
+    implementation("com.google.code.gson:gson:2.13.1")
+
+    implementation("androidx.datastore:datastore-preferences:1.1.6")
+
+    implementation("io.coil-kt.coil3:coil-compose:3.2.0")
+    implementation("io.coil-kt.coil3:coil-network-okhttp:3.2.0")
+
 }

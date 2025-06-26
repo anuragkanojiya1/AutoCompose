@@ -1,5 +1,6 @@
 package com.example.autocompose.ui.navigation
 
+import OnboardingScreen
 import android.app.Application
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeIn
@@ -19,21 +20,32 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
 import com.example.autocompose.SplashScreen
+import com.example.autocompose.auth.LogInScreen
+import com.example.autocompose.auth.SignUpScreen
 import com.example.autocompose.ui.composables.AgentScreen
 import com.example.autocompose.ui.composables.AnalyticsScreen
 import com.example.autocompose.ui.composables.DraftAgentScreen
 import com.example.autocompose.ui.composables.HomeScreen
+import com.example.autocompose.ui.composables.PaymentScreen
+import com.example.autocompose.ui.composables.SettingsScreen
+import com.example.autocompose.ui.composables.SubscriptionScreen
 import com.example.autocompose.ui.viewmodel.AutoComposeViewmodel
 import com.example.autocompose.ui.viewmodel.FrequentEmailViewModel
+import com.example.autocompose.ui.viewmodel.PaymentViewModel
+import com.google.firebase.auth.FirebaseAuth
 
 @Composable
-fun NavGraph(navController: NavController,
-             frequentEmailViewModel: FrequentEmailViewModel,
-             autoComposeViewmodel: AutoComposeViewmodel,
-             application: Application
+fun NavGraph(
+    navController: NavController,
+    frequentEmailViewModel: FrequentEmailViewModel,
+    autoComposeViewmodel: AutoComposeViewmodel,
+    paymentViewModel: PaymentViewModel,
+    application: Application,
 ) {
+
     val context = LocalContext.current
     val navController = rememberNavController()
+    val auth = FirebaseAuth.getInstance()
 
     NavHost(navController, startDestination = Screen.Splash.route) {
         composable(Screen.Home.route,
@@ -58,7 +70,7 @@ fun NavGraph(navController: NavController,
                 slideOutVertically(targetOffsetY = { it }, animationSpec = tween(500)) + fadeOut()
             }
         ) {
-            AgentScreen(autoComposeViewmodel, frequentEmailViewModel)
+            AgentScreen(autoComposeViewmodel, frequentEmailViewModel, navController)
         }
         composable(Screen.Analytics.route,
             enterTransition = { fadeIn(animationSpec = tween(700)) },
@@ -81,7 +93,32 @@ fun NavGraph(navController: NavController,
         ) { backStackEntry ->
             val subject = backStackEntry.arguments?.getString("subject") ?: ""
             val emailBody = backStackEntry.arguments?.getString("emailBody") ?: ""
-            DraftAgentScreen(autoComposeViewmodel, frequentEmailViewModel, subject, emailBody)
+            DraftAgentScreen(autoComposeViewmodel, frequentEmailViewModel, navController, subject, emailBody)
+        }
+
+        // Payment Screen
+        composable(
+            route = Screen.PaymentScreen.route,
+            arguments = listOf(
+                navArgument("amount") { type = NavType.StringType }
+            ),
+            enterTransition = {
+                scaleIn(initialScale = 0.8f, animationSpec = tween(500)) + fadeIn()
+            },
+            exitTransition = {
+                scaleOut(targetScale = 1.2f, animationSpec = tween(500)) + fadeOut()
+            }
+        ) { backStackEntry ->
+            val amount = backStackEntry.arguments?.getString("amount") ?: "5.00"
+            PaymentScreen(navController, paymentViewModel, amount)
+        }
+
+        composable(Screen.SignUp.route) {
+            SignUpScreen(navController, auth)
+        }
+
+        composable(Screen.LogIn.route) {
+            LogInScreen(navController, auth)
         }
 
         composable(Screen.Splash.route){
@@ -96,7 +133,27 @@ fun NavGraph(navController: NavController,
                 slideOutHorizontally(targetOffsetX = { it }, animationSpec = tween(600)) + fadeOut()
             }
         ){
+            SettingsScreen(navController)
         }
 
+        composable(
+            route = Screen.SubscriptionScreen.route,
+            enterTransition = {
+                slideInHorizontally(initialOffsetX = { it }, animationSpec = tween(600)) + fadeIn()
+            },
+            exitTransition = {
+                slideOutHorizontally(targetOffsetX = { -it }, animationSpec = tween(600)) + fadeOut()
+            }
+        ) {
+            SubscriptionScreen(navController = navController, autoComposeViewmodel)
+        }
+
+        composable(
+            route = Screen.Onboarding.route,
+            enterTransition = { fadeIn(animationSpec = tween(700)) },
+            exitTransition = { fadeOut(animationSpec = tween(700)) }
+        ) {
+            OnboardingScreen(navController = navController)
+        }
     }
 }

@@ -16,7 +16,7 @@ object ApiInstance {
             .build()
 
         return Retrofit.Builder()
-            .baseUrl("https://autocomposebackend-production.up.railway.app/")
+            .baseUrl("https://autocomposebackend.onrender.com/")
             .client(okHttpClient)
             .addConverterFactory(GsonConverterFactory.create())
             .build()

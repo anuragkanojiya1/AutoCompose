@@ -80,6 +80,11 @@ import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.IconButtonColors
 import androidx.compose.material3.IconButtonDefaults
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.navigation.NavController
+import androidx.navigation.compose.rememberNavController
+import com.example.autocompose.data.datastore.PreferencesManager
+import com.example.autocompose.ui.navigation.Screen
 import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -87,6 +92,7 @@ import kotlinx.coroutines.launch
 fun DraftAgentScreen(
     autoComposeViewmodel: AutoComposeViewmodel,
     frequentEmailViewModel: FrequentEmailViewModel,
+    navController: NavController,
     passSubject: String,
     passEmailContent: String
 ) {
@@ -110,6 +116,18 @@ fun DraftAgentScreen(
 
     val speechContext = context as MainActivity
 
+    var token by rememberSaveable { mutableStateOf("") }
+
+    val preferencesManager = PreferencesManager(context)
+
+    val subscriptionState = autoComposeViewmodel.checkSubscription.collectAsState()
+
+    val subscriptionTier by preferencesManager.subscriptionTierFlow.collectAsState(initial = "free")
+
+    Log.d("SubscriptionTier", subscriptionTier)
+
+    val subscription = subscriptionState.value
+
     LaunchedEffect(speechContext.speechInput.value) {
         if (speechContext.speechInput.value.isNotBlank()) {
             emailContext = speechContext.speechInput.value
@@ -127,16 +145,30 @@ fun DraftAgentScreen(
         }
     }
 
+    if (token.isNotBlank()) {
+        LaunchedEffect(Unit) {
+            autoComposeViewmodel.checkSubscription(token)
+            Log.d("Subscription", subscription.toString())
+        }
+    }
+
     Scaffold(
         topBar = {
             Column {
                 TopAppBar(
-                    title = { Text("AutoCompose") },
+                    title = {
+                        if(subscriptionTier=="premium"){
+                            Text("AutoCompose ✨")
+                        } else{
+                            Text("AutoCompose")
+                        }
+                    },
                     actions = {
                         IconButton(
                             onClick = {
                                 // Delete the current email if it exists in database
                                 frequentEmailViewModel.deleteEmailByContent(subject, emailContent)
+                                Toast.makeText(context, "Email deleted", Toast.LENGTH_SHORT).show()
                                 // Navigate back
                                 (context as? MainActivity)?.onBackPressedDispatcher?.onBackPressed()
                             },
@@ -300,7 +332,7 @@ fun DraftAgentScreen(
                             modifier = Modifier.fillMaxWidth(),
                             horizontalArrangement = Arrangement.spacedBy(8.dp),
                         ) {
-                            val models = listOf("DeepSeek", "Gemini", "Mistral")
+                            val models = listOf("Gemini", "Mistral", "Llama")
                             models.forEach { model ->
                                 FilterChip(
                                     selected = selectedModel == model,
@@ -313,6 +345,10 @@ fun DraftAgentScreen(
                                         labelColor = Color.Black,
                                     ),
                                     shape = RoundedCornerShape(20.dp),
+                                    border = BorderStroke(
+                                        width = 2.5.dp,
+                                        color = if (model == "Mistral") Color(0xFFCBAF1A) else Color.Transparent
+                                    ),
                                     modifier = Modifier.weight(1f)
                                 )
                             }
@@ -473,12 +509,45 @@ fun DraftAgentScreen(
                 ) {
                     Button(
                         onClick = {
-                            autoComposeViewmodel.generateEmail(
-                                tone = selectedTone,
-                                ai_model = selectedModel,
-                                language = language,
-                                context = emailContext
-                            )
+                            if (emailContext.isNotEmpty() && recipientEmail.isNotEmpty()) {
+                                // Prevent sending "string" as a value
+                                val validTone =
+                                    if (selectedTone == "string" || selectedTone.isBlank()) "Professional" else selectedTone
+                                val validModel =
+                                    if (selectedModel == "string" || selectedModel.isBlank()) "Llama" else selectedModel
+                                val validLanguage =
+                                    if (language == "string" || language.isBlank()) "English" else language
+
+                                if (token.isNotBlank()) {
+
+                                    if (selectedModel!="Mistral"){
+                                        autoComposeViewmodel.generateEmail(
+                                            tone = validTone,
+                                            ai_model = validModel,
+                                            language = validLanguage,
+                                            context = emailContext,
+                                            token = token
+                                        )}
+                                    else{
+                                        if (subscription!="free" || subscriptionTier=="premium"){
+                                            autoComposeViewmodel.generateEmail(
+                                                tone = validTone,
+                                                ai_model = validModel,
+                                                language = validLanguage,
+                                                context = emailContext,
+                                                token = token
+                                            )
+                                        } else {
+                                            navController.navigate(Screen.PaymentScreen.route)
+                                            Toast.makeText(context, "You need a subscription to use Mistral", Toast.LENGTH_SHORT).show()
+                                        }
+                                    }
+                                } else {
+                                    Toast.makeText(context, "Token is null Login again please", Toast.LENGTH_SHORT).show()
+                                }
+                            } else {
+                                Toast.makeText(context, "Please fill in all fields", Toast.LENGTH_SHORT).show()
+                            }
                         },
                         modifier = Modifier.weight(1f),
                         colors = ButtonDefaults.buttonColors(
@@ -523,22 +592,25 @@ fun DraftAgentScreen(
 
                     Button(
                         onClick = {
-                            try {
-                                // Save email to the database and increment frequency
-                                frequentEmailViewModel.saveOrUpdateEmail(
-                                    subject = emailSubject.value,
-                                    emailBody = generatedEmail.value
-                                )
-                                Log.d("AgentScreen", "Sending email with subject: '${emailSubject.value}'")
-                                Log.d("AgentScreen", "Updated frequency in database")
-                                context.startActivity(createEmailIntent())
-                            } catch (e: ActivityNotFoundException) {
-                                Log.e("AgentScreen", "Gmail app not installed!", e)
-                                Toast.makeText(context, "Gmail app not installed!", Toast.LENGTH_SHORT).show()
-                            } catch (e: Exception) {
-                                Log.e("AgentScreen", "Error sending email", e)
-                                Toast.makeText(context, "Error sending email: ${e.message}", Toast.LENGTH_SHORT).show()
-                            }
+                            if (subject.isNotEmpty() && emailContent.isNotEmpty())
+                                try {
+                                    // Save email to the database and increment frequency
+                                    frequentEmailViewModel.saveOrUpdateEmail(
+                                        subject = emailSubject.value,
+                                        emailBody = generatedEmail.value
+                                    )
+                                    Log.d("DraftAgentScreen", "Sending email with subject: '${emailSubject.value}'")
+                                    Log.d("DraftAgentScreen", "Updated frequency in database")
+                                    context.startActivity(createEmailIntent())
+                                } catch (e: ActivityNotFoundException) {
+                                    Log.e("DraftAgentScreen", "Gmail app not installed!", e)
+                                    Toast.makeText(context, "Gmail app not installed!", Toast.LENGTH_SHORT).show()
+                                } catch (e: Exception) {
+                                    Log.e("DraftAgentScreen", "Error sending email", e)
+                                    Toast.makeText(context, "Error sending email: ${e.message}", Toast.LENGTH_SHORT).show()
+                                }
+                            else
+                                Toast.makeText(context, "Please generate subject and email content", Toast.LENGTH_SHORT).show()
                         },
                         modifier = Modifier.weight(1f),
                         colors = ButtonDefaults.buttonColors(
@@ -567,9 +639,12 @@ fun DraftAgentScreen(
 @Composable
 fun DraftAgentScreenPreview() {
     AutoComposeTheme {
-        AgentScreen(
+        DraftAgentScreen(
             autoComposeViewmodel = AutoComposeViewmodel(),
-            frequentEmailViewModel = FrequentEmailViewModel(Application())
+            frequentEmailViewModel = FrequentEmailViewModel(Application()),
+            navController = rememberNavController(),
+            "",
+            ""
         )
     }
 }

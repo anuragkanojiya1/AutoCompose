@@ -1,4 +1,4 @@
-package com.example.autocompose.domain.model
+package com.example.autocompose.domain.responseModel
 
 data class AnalyticsResponse(
     val top_languages: List<TopLanguage>,

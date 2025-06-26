@@ -34,9 +34,11 @@ import androidx.compose.material.icons.sharp.TrendingUp
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Brush
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
+import com.example.autocompose.data.datastore.PreferencesManager
 import com.example.autocompose.ui.navigation.Screen
 import java.util.Locale
 
@@ -50,6 +52,12 @@ fun AnalyticsScreen(autoComposeViewmodel: AutoComposeViewmodel, navController: N
     val topTones = autoComposeViewmodel.topTones.collectAsState()
 
     var isLoading by remember { mutableStateOf(true) }
+
+    val context = LocalContext.current
+
+    val preferencesManager = PreferencesManager(context)
+
+    val subscriptionTier by preferencesManager.subscriptionTierFlow.collectAsState(initial = "free")
 
     Log.d("AnalyticsScreen", "popularModels: $popularModels")
     Log.d("AnalyticsScreen", "topLanguages: $topLanguages")
@@ -78,7 +86,13 @@ fun AnalyticsScreen(autoComposeViewmodel: AutoComposeViewmodel, navController: N
         topBar = {
             Column {
                 TopAppBar(
-                    title = { Text("AutoCompose") },
+                    title = {
+                        if(subscriptionTier=="premium") {
+                            Text("AutoCompose ✨")
+                        } else{
+                            Text("AutoCompose")
+                        }
+                    },
 //                    actions = {
 //                        IconButton(onClick = { /* Settings action */ }) {
 //                            Icon(

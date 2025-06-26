@@ -1,4 +1,4 @@
-package com.example.autocompose.domain.model
+package com.example.autocompose.domain.responseModel
 
 import com.google.gson.JsonDeserializationContext
 import com.google.gson.JsonDeserializer

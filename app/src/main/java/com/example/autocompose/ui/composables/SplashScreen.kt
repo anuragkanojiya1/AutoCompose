@@ -26,7 +26,9 @@ import androidx.lifecycle.viewModelScope
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
+import com.example.autocompose.data.datastore.PreferencesManager
 import com.example.autocompose.ui.navigation.Screen
+import com.google.firebase.auth.FirebaseAuth
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -48,27 +50,55 @@ class MainViewModel : ViewModel() {
 fun SplashScreen(navController: NavController, mainViewModel: MainViewModel = viewModel()) {
     val isLoading by mainViewModel.isLoading.collectAsState()
 
+    val auth = FirebaseAuth.getInstance()
+    val currentUser = auth.currentUser
 
+    val context = androidx.compose.ui.platform.LocalContext.current
+    val preferencesManager = PreferencesManager(context)
+    val hasSeenOnboarding by preferencesManager.hasSeenOnboardingFlow.collectAsState(initial = false)
+
+    if(currentUser==null){
         LaunchedEffect(key1 = isLoading) {
             if (!isLoading) {
-                navController.navigate(Screen.Home.route) {
-                    popUpTo("splash") { inclusive = true }
+                if (hasSeenOnboarding) {
+                    navController.navigate(Screen.LogIn.route) {
+                        popUpTo("splash_screen") { inclusive = true }
+                    }
+                } else {
+                    navController.navigate(Screen.Onboarding.route) {
+                        popUpTo("splash_screen") { inclusive = true }
+                    }
                 }
             }
         }
+    } else{
+        LaunchedEffect(key1 = isLoading) {
+            if (!isLoading) {
+                navController.navigate(Screen.Home.route) {
+                    popUpTo("splash_screen") { inclusive = true }
+                }
+            }
+        }
+    }
 
     Surface(
-        modifier = Modifier.fillMaxSize().background(color = Color.White)
+        modifier = Modifier
+            .fillMaxSize()
+            .background(color = Color.White)
     ) {
         Row(
-            modifier = Modifier.fillMaxSize().background(color = Color.White),
+            modifier = Modifier
+                .fillMaxSize()
+                .background(color = Color.White),
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.Center,
         ) {
             Image(
                 painter = painterResource(id = R.drawable.logo2),
                 contentDescription = "Movie Galaxy",
-                modifier = Modifier.size(208.dp).scale(2f,2f)
+                modifier = Modifier
+                    .size(208.dp)
+                    .scale(2f, 2f)
                     .clip(shape = RoundedCornerShape(45.dp)),
                 contentScale = ContentScale.Fit
             )

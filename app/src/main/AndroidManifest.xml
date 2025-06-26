@@ -3,6 +3,7 @@
     xmlns:tools="http://schemas.android.com/tools">
 
     <uses-permission android:name="android.permission.INTERNET"/>
+    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
 
     <application
         android:allowBackup="true"
@@ -13,16 +14,28 @@
         android:roundIcon="@drawable/logo2"
         android:supportsRtl="true"
         android:theme="@style/Theme.AutoCompose"
+        android:enableOnBackInvokedCallback="true"
         tools:targetApi="31">
         <activity
             android:name=".MainActivity"
             android:exported="true"
+            android:launchMode="singleTop"
             android:label="@string/app_name"
             android:theme="@style/Theme.AutoCompose">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
-
                 <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+
+            <!-- PayPal Web Payments redirect handler -->
+            <intent-filter>
+                <action android:name="android.intent.action.VIEW" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.BROWSABLE" />
+
+                <data
+                    android:scheme="com.example.autocompose"
+                    android:host="paypalpay" />
             </intent-filter>
         </activity>
     </application>

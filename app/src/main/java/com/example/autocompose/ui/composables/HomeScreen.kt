@@ -77,7 +77,9 @@ import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
 import com.example.autocompose.R
 import com.example.autocompose.data.database.Entity
+import com.example.autocompose.data.datastore.PreferencesManager
 import com.example.autocompose.ui.navigation.Screen
+import com.example.autocompose.ui.navigation.navigateToPayment
 import com.example.autocompose.ui.viewmodel.AutoComposeViewmodel
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -100,6 +102,10 @@ fun HomeScreen(
     val (displayCount, setDisplayCount) = remember { mutableStateOf(maxInitialEmails) }
 
     val context = LocalContext.current
+
+    val preferencesManager = PreferencesManager(context)
+
+    val subscriptionTier by preferencesManager.subscriptionTierFlow.collectAsState(initial = "free")
 
     // Add logging when emails are collected
     androidx.compose.runtime.LaunchedEffect(frequentEmails) {
@@ -166,7 +172,11 @@ fun HomeScreen(
 //                                shape = RoundedCornerShape(12.dp),
                                 )
                         } else {
-                            Text("AutoCompose")
+                            if(subscriptionTier=="premium"){
+                                Text("AutoCompose ✨")
+                            } else{
+                                Text("AutoCompose")
+                            }
                         }
                     },
                     actions = {
@@ -284,6 +294,23 @@ fun HomeScreen(
                         color = Color.White
                     )
                 }
+
+                Spacer(modifier = Modifier.height(24.dp))
+
+                // PayPal Payment Button
+//                Button(
+//                    onClick = { navController.navigateToPayment("10.00") },
+//                    modifier = Modifier.fillMaxWidth(),
+//                    shape = RoundedCornerShape(8.dp),
+//                    colors = ButtonDefaults.buttonColors(
+//                        containerColor = Color(0xFF0070BA) // PayPal blue
+//                    )
+//                ) {
+//                    Text(
+//                        text = "Pay with PayPal",
+//                        color = Color.White
+//                    )
+//                }
 
                 Spacer(modifier = Modifier.height(24.dp))
             }
