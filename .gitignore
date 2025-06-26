@@ -14,3 +14,4 @@
 .cxx
 local.properties
 app/src/main/java/com/example/autocompose/utils/*
+app/src/main/java/com/example/autocompose/utils/Constants.kt
