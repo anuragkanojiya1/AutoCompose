@@ -20,6 +20,7 @@ AutoCompose is an intelligent email agent built for speed, multilingual fluency,
 - Frequently sent emails are automatically saved as **smart drafts**.
 - Stored locally via **Room Database** for **offline access** and reusability.
 - Quickly edit and reuse previous emails without retyping them.
+- 🔍 **Search bar available** to easily find your saved drafts by keyword or content.
 
 ### 📤 Gmail Integration
 - Directly **send generated emails via Gmail** without leaving the app.
@@ -37,11 +38,12 @@ AutoCompose is an intelligent email agent built for speed, multilingual fluency,
 - Built using **Jetpack Compose** for a modern, clean, and fast experience.
 - UI adapts to user context with language and tone selectors.
 - Includes a **chat-like interface** for AI interactions.
+- 🌗 **Supports both Light and Dark Mode** for a comfortable viewing experience.
 
 ---
 
 ## 📱Screenshots
-<img src="https://github.com/user-attachments/assets/dafd666e-2f5b-43d6-9205-2b6927c219c1" alt="Screenshot_20250408_183732" width="250"/>
+<img src="https://github.com/user-attachments/assets/f0558866-dbcf-4e2d-b7fc-87b63b895d0f" alt="Screenshot_20250421_144040" width="250"/>
 <img src="https://github.com/user-attachments/assets/a1263b49-0c22-427a-a953-41e1b9b0f12e" alt="Screenshot_20250408_183741" width="250"/>
 <img src="https://github.com/user-attachments/assets/446c877e-57b4-4f85-b40a-51c7b86fd7a7" alt="Screenshot_20250408_183942" width="250"/>
 <img src="https://github.com/user-attachments/assets/07af1e86-3961-4ce4-bec0-487748bb6de2" alt="Screenshot_20250408_183957" width="250"/>
@@ -52,7 +54,7 @@ AutoCompose is an intelligent email agent built for speed, multilingual fluency,
 - [**Dev.to post**](https://dev.to/anuragkanojiya/how-to-use-langgraph-within-a-fastapi-backend-amm)
 
 ## 🚀Demo
-- [**Youtube Link**](https://www.youtube.com/watch?v=JNPY4eGm26U&t=81s&ab_channel=AnuragKanojiya)
+- [**Youtube Link**](https://youtu.be/JNPY4eGm26U)
 
 ## 🧰 Tech Stack
 
@@ -65,6 +67,8 @@ AutoCompose is an intelligent email agent built for speed, multilingual fluency,
 - **Voice Input**: Android Speech-to-Text
 - **AI Integration**: Gemini, Groq (Mistral, LLama)
 - **Realtime Analytics**: Supabase Realtime + Dashboard UI
+- **Dark Mode Support**: Jetpack Compose `MaterialTheme` adaptive theming
+- **Search Functionality**: Draft filtering via search bar
 
 ### 🧪 AI/Backend
 - **Backend Framework**: FastAPI
@@ -98,7 +102,7 @@ Backend (Python - FastAPI)
 
 ## 📦 Installation & Setup
 
-1. Download the app directly from apk: [apk.zip](https://github.com/user-attachments/files/19651040/apk.zip)
+1. Download the app directly from apk: [apk.zip](https://github.com/user-attachments/files/19911786/apk.zip)
 2. Clone the Android project.
 - Open in Android Studio.
 - Run on emulator or device.
