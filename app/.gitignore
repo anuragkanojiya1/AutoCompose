@@ -2,3 +2,4 @@
 /google-services.json
 app/src/main/java/com/example/autocompose/utils/*
 app/src/main/java/com/example/autocompose/utils/Constants.kt
+**/Constants.kt
