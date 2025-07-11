@@ -1,18 +1,72 @@
+# Kotlin/Java build outputs
+/build/
+*/build/
+
+# Android Studio
+.idea/
 *.iml
-.gradle
-/local.properties
-/.idea/caches
-/.idea/libraries
-/.idea/modules.xml
-/.idea/workspace.xml
-/.idea/navEditor.xml
-/.idea/assetWizardSettings.xml
-.DS_Store
-/build
-/captures
-.externalNativeBuild
-.cxx
+*.ipr
+*.iws
+.idea/caches/
+.idea/libraries/
+.idea/modules.xml
+.idea/workspace.xml
+.idea/navEditor.xml
+.idea/assetWizardSettings.xml
+
+# Local configuration files
 local.properties
-app/src/main/java/com/example/autocompose/utils/*
-app/src/main/java/com/example/autocompose/utils/Constants.kt
+/local.properties
+
+# Gradle
+.gradle/
+gradle-app.setting
+gradle-wrapper.properties.lock
+
+# OS-specific files
+.DS_Store
+Thumbs.db
+
+# Keystore files (never commit signing keys!)
+*.jks
+*.keystore
+**/signing.properties
+
+# Logs and crash reports
+*.log
+
+# Cache and generated files
+.cache/
+.cxx/
+.externalNativeBuild/
+captures/
+.generated/
+.navigation/
+.kapt/
+.ksp/
+*.preview.cache/
+
+# IntelliJ
+out/
+
+# Misc
+*.swp
+*.swo
+
+# Jetifier
+.jetifier-*
+
+# Fastlane
+fastlane/report.xml
+fastlane/Preview.html
+fastlane/screenshots
+
+# Firebase
+firebase-debug.log
+
+# Local test reports
+test-results/
+reports/
+
+# Exclude constants if needed
 **/Constants.kt
