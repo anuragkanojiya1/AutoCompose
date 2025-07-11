@@ -20,8 +20,24 @@ jobs:
         distribution: 'temurin'
         java-version: 17
 
+    - name: Make gradlew executable
+      run: chmod +x ./gradlew
+
     - name: Clean project
       run: ./gradlew clean
+
+    - name: Decode google-services.json
+      run: |
+        echo "$GOOGLE_SERVICES_JSON" | base64 -d > app/google-services.json
+      env:
+        GOOGLE_SERVICES_JSON: ${{ secrets.GOOGLE_SERVICES_JSON }}
+
+    - name: Reconstruct Constants.kt
+      run: |
+        mkdir -p app/src/main/java/com/example/autocompose/utils
+        echo "$CONSTANTS_KT" | base64 -d > app/src/main/java/com/example/autocompose/utils/Constants.kt
+      env:
+        CONSTANTS_KT: ${{ secrets.CONSTANTS_KT }}
 
     - name: Build debug APK
       run: ./gradlew assembleDebug

@@ -114,6 +114,10 @@ fun AgentScreen(
 
     val preferencesManager = PreferencesManager(context)
 
+    val defaultLanguage = preferencesManager.languageFlow.collectAsState(initial = "English")
+    val defaultFontFamily = preferencesManager.fontFamilyFlow.collectAsState(initial = "Default")
+    val defaultWritingStyle = preferencesManager.writingStyleFlow.collectAsState(initial = "Professional")
+
     val subscriptionState = autoComposeViewmodel.checkSubscription.collectAsState()
 
     val subscriptionTier by preferencesManager.subscriptionTierFlow.collectAsState(initial = "free")

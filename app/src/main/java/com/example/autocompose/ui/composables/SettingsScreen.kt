@@ -81,7 +81,7 @@ fun SettingsScreen(navController: NavController) {
     val preferencesManager = PreferencesManager(context)
     val subscriptionTier by preferencesManager.subscriptionTierFlow.collectAsState(initial = "free")
 
-    val primaryColor = Color(0xFF2196F3) // Brown color from screenshot
+    val primaryColor = Color(0xFF2196F3)
     val lightBgColor = Color(0xFFFEF6F2) // Light background color for profile section
     val scrollState = rememberScrollState()
 

@@ -74,6 +74,7 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -478,9 +479,19 @@ fun PaymentScreen(
                 paymentState.isSuccess -> {
                     // Success state handling preserved
 
-                    CoroutineScope(Dispatchers.IO).launch {
-                        preferencesManager.saveSubscriptionTier("premium")
-                        autoComposeViewmodel.updateSubscription(UpdateSubscriptionRequest("premium"), token)
+//                    CoroutineScope(Dispatchers.IO).launch {
+//                        preferencesManager.saveSubscriptionTier("premium")
+//                        autoComposeViewmodel.updateSubscription(UpdateSubscriptionRequest("premium"), token)
+//                    }
+
+                    LaunchedEffect(Unit) {
+                        withContext(Dispatchers.IO) {
+                            preferencesManager.saveSubscriptionTier("premium")
+                            autoComposeViewmodel.updateSubscription(
+                                UpdateSubscriptionRequest("premium"),
+                                token
+                            )
+                        }
                     }
 
                     Box(
