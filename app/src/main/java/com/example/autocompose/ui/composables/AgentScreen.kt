@@ -11,10 +11,8 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
@@ -28,15 +26,12 @@ import androidx.compose.material.icons.automirrored.sharp.Message
 import androidx.compose.material.icons.filled.Language
 import androidx.compose.material.icons.filled.Loop
 import androidx.compose.material.icons.filled.MicNone
-import androidx.compose.material.icons.filled.Recycling
-import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.filled.Send
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
-import androidx.compose.material3.Divider
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExposedDropdownMenuBox
@@ -95,9 +90,7 @@ fun AgentScreen(
 ) {
     val primaryBlue = Color(0xFF2196F3)
     var recipientEmail by remember { mutableStateOf("") }
-    var language by remember { mutableStateOf("English") }
     var languageExpanded by remember { mutableStateOf(false) }
-    var selectedTone by remember { mutableStateOf("Professional") }
     var selectedModel by remember { mutableStateOf("Llama") }
     var subject by remember { mutableStateOf("") }
     var emailContent by remember { mutableStateOf("") }
@@ -117,6 +110,24 @@ fun AgentScreen(
     val defaultLanguage = preferencesManager.languageFlow.collectAsState(initial = "English")
     val defaultFontFamily = preferencesManager.fontFamilyFlow.collectAsState(initial = "Default")
     val defaultWritingStyle = preferencesManager.writingStyleFlow.collectAsState(initial = "Professional")
+
+    Log.d("DefaultFont", defaultFontFamily.value.toString())
+
+    var selectedTone by remember { mutableStateOf(defaultWritingStyle.value.toString()) }
+    LaunchedEffect(defaultWritingStyle.value) {
+        selectedTone = defaultWritingStyle.value.toString()
+    }
+
+    Log.d("defaultW", defaultWritingStyle.value)
+    Log.d("WritingTone", selectedTone)
+
+    var language by remember { mutableStateOf(defaultLanguage.value) }
+    LaunchedEffect(defaultLanguage.value) {
+        language = defaultLanguage.value
+    }
+
+    Log.d("defaultL", defaultLanguage.value)
+    Log.d("Language", language.toString())
 
     val subscriptionState = autoComposeViewmodel.checkSubscription.collectAsState()
 
@@ -300,6 +311,13 @@ fun AgentScreen(
                                     modifier = Modifier.background(MaterialTheme.colorScheme.background)
                                 ) {
                                     DropdownMenuItem(
+                                        text = { Text("German") },
+                                        onClick = {
+                                            language = "German"
+                                            languageExpanded = false
+                                        }
+                                    )
+                                    DropdownMenuItem(
                                         text = { Text("English") },
                                         onClick = {
                                             language = "English"
@@ -468,7 +486,13 @@ fun AgentScreen(
                         textStyle = TextStyle(
                             fontSize = 20.sp,
                             color = MaterialTheme.colorScheme.onSurface,
-                            fontFamily = FontFamily.Serif,
+                            fontFamily = when(defaultFontFamily.value.toString()) {
+                                "FontFamily.Serif" -> FontFamily.Serif
+                                "FontFamily.SansSerif" -> FontFamily.SansSerif
+                                "FontFamily.Monospace" -> FontFamily.Monospace
+                                "FontFamily.Cursive" -> FontFamily.Cursive
+                                else -> FontFamily.Default
+                            },
                         ),
                         modifier = Modifier
                             .fillMaxWidth()

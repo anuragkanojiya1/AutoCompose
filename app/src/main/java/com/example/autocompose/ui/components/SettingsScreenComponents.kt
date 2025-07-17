@@ -45,6 +45,7 @@ fun FontSelectionDialog(
                                 "Serif" -> "Serif"
                                 "SansSerif" -> "Sans Serif"
                                 "Monospace" -> "Monospace"
+                                "Cursive" -> "Cursive"
                                 else -> font
                             },
                             modifier = Modifier.weight(1f),
@@ -52,6 +53,7 @@ fun FontSelectionDialog(
                                 "Serif" -> FontFamily.Serif
                                 "SansSerif" -> FontFamily.SansSerif
                                 "Monospace" -> FontFamily.Monospace
+                                "Cursive" -> FontFamily.Cursive
                                 else -> FontFamily.Default
                             }
                         )
@@ -131,10 +133,12 @@ fun WritingStyleSelectionDialog(
     onWritingStyleSelected: (String) -> Unit,
     onDismiss: () -> Unit,
 ) {
-    val writingStyleOptions = listOf(
-        "Professional", "Casual",
-        "Formal", "Informal", "Impromptu"
-    )
+//    val writingStyleOptions = listOf(
+//        "Professional", "Casual", "Friendly",
+//        "Formal", "Informal", "Impromptu"
+//    )
+    val writingStyleOptions = listOf("Professional", "Formal", "Friendly")
+
 
     AlertDialog(
         onDismissRequest = onDismiss,
