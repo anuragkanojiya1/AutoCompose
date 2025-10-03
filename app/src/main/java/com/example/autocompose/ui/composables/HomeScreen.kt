@@ -196,8 +196,7 @@ fun HomeScreen(
                     )
                 )
                 HorizontalDivider(
-                    modifier = Modifier
-                        .padding(bottom = 12.dp),
+                    modifier = Modifier,
                     thickness = 0.65.dp,
                     color = Color(0xFFDCDBDB)
                 )
@@ -251,6 +250,9 @@ fun HomeScreen(
                 .padding(innerPadding)
                 .padding(16.dp)
         ) {
+
+            Spacer(modifier = Modifier.padding(top = 2.dp))
+
             if (!isSearchActive) {
                 Surface(
                     modifier = Modifier
