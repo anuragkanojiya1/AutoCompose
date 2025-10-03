@@ -73,6 +73,7 @@ import com.example.autocompose.ui.theme.AutoComposeTheme
 import com.example.autocompose.ui.viewmodel.AutoComposeViewmodel
 import com.example.autocompose.ui.viewmodel.FrequentEmailViewModel
 import android.util.Log
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.navigation.NavController
@@ -207,7 +208,7 @@ fun AgentScreen(
                         containerColor = MaterialTheme.colorScheme.background
                     )
                 )
-                HorizontalDivider(modifier = Modifier.padding(bottom = 12.dp),
+                HorizontalDivider(modifier = Modifier,
                     thickness = 0.65.dp,
                     color = Color(0xFFDCDBDB)
                 )
@@ -225,6 +226,8 @@ fun AgentScreen(
                     .verticalScroll(rememberScrollState()),
                 verticalArrangement = Arrangement.spacedBy(16.dp)
             ) {
+                Spacer(modifier = Modifier.padding(top = 2.dp))
+
                 OutlinedTextField(
                     value = recipientEmail,
                     onValueChange = { recipientEmail = it },
