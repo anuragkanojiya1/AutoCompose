@@ -59,7 +59,7 @@ fun AnalyticsScreen(autoComposeViewmodel: AutoComposeViewmodel, navController: N
 
     val subscriptionTier by preferencesManager.subscriptionTierFlow.collectAsState(initial = "free")
 
-    Log.d("AnalyticsScreen", "popularModels: $popularModels")
+    Log.d("AnalyticsScreen", "popularModels: ${popularModels}")
     Log.d("AnalyticsScreen", "topLanguages: $topLanguages")
     Log.d("AnalyticsScreen", "topTones: $topTones")
 
@@ -105,7 +105,7 @@ fun AnalyticsScreen(autoComposeViewmodel: AutoComposeViewmodel, navController: N
                         containerColor = MaterialTheme.colorScheme.background
                     )
                 )
-                HorizontalDivider(modifier = Modifier.padding(bottom = 12.dp),
+                HorizontalDivider(modifier = Modifier,
                     thickness = 0.65.dp,
                     color = Color(0xFFDCDBDB)
                 )
@@ -151,6 +151,8 @@ fun AnalyticsScreen(autoComposeViewmodel: AutoComposeViewmodel, navController: N
         },
         modifier = Modifier.background(color = Color.White)
     ) { innerPadding ->
+
+
         Column(
             modifier = Modifier
                 .padding(innerPadding)
@@ -159,6 +161,8 @@ fun AnalyticsScreen(autoComposeViewmodel: AutoComposeViewmodel, navController: N
                 .verticalScroll(scrollState)
                 .padding(16.dp)
         ) {
+            Spacer(modifier = Modifier.padding(top = 4.dp))
+
             // Dashboard Title and Date Selector
             Row(
                 modifier = Modifier.fillMaxWidth(),
