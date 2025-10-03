@@ -184,7 +184,7 @@ fun DraftAgentScreen(
                         containerColor = MaterialTheme.colorScheme.background
                     )
                 )
-                HorizontalDivider(modifier = Modifier.padding(bottom = 12.dp),
+                HorizontalDivider(modifier = Modifier,
                     thickness = 0.65.dp,
                     color = Color(0xFFDCDBDB)
                 )
@@ -202,6 +202,8 @@ fun DraftAgentScreen(
                     .verticalScroll(rememberScrollState()),
                 verticalArrangement = Arrangement.spacedBy(16.dp)
             ) {
+                Spacer(modifier = Modifier.padding(top = 2.dp))
+
                 // Recipient email field
                 OutlinedTextField(
                     value = recipientEmail,
