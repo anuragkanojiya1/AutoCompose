@@ -19,11 +19,16 @@ android {
         versionName = "1.0"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
+
+        ndk {
+            abiFilters += listOf("arm64-v8a", "armeabi-v7a")
+        }
     }
 
     buildTypes {
         release {
-            isMinifyEnabled = false
+            isMinifyEnabled = true
+            isShrinkResources = true
             proguardFiles(
                 getDefaultProguardFile("proguard-android-optimize.txt"),
                 "proguard-rules.pro"
@@ -81,7 +86,7 @@ dependencies {
     implementation("androidx.lifecycle:lifecycle-viewmodel-compose:2.8.7")
     val nav_version = "2.8.9"
     implementation("androidx.navigation:navigation-compose:$nav_version")
-    implementation("com.patrykandpatrick.vico:compose:1.12.0")
+
     implementation("com.paypal.android:paypal-web-payments:2.0.0")
 
     implementation("com.google.code.gson:gson:2.13.1")
