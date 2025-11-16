@@ -1,5 +1,7 @@
 package com.example.autocompose.ui.composables
 
+import android.content.Intent
+import android.net.Uri
 import android.util.Log
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
@@ -73,6 +75,7 @@ import com.example.autocompose.ui.navigation.Screen
 import com.example.autocompose.ui.theme.AutoComposeTheme
 import com.google.firebase.auth.FirebaseAuth
 import kotlinx.coroutines.launch
+import androidx.core.net.toUri
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -168,13 +171,13 @@ fun SettingsScreen(navController: NavController) {
                         )
                     }
 
-                    IconButton(onClick = { /* Edit profile */ }) {
-                        Icon(
-                            imageVector = Icons.Default.Edit,
-                            contentDescription = "Edit Profile",
-                            tint = primaryColor
-                        )
-                    }
+//                    IconButton(onClick = { /* Edit profile */ }) {
+//                        Icon(
+//                            imageVector = Icons.Default.Edit,
+//                            contentDescription = "Edit Profile",
+//                            tint = primaryColor
+//                        )
+//                    }
                 }
             }
 
@@ -384,7 +387,13 @@ fun SettingsScreen(navController: NavController) {
             SupportItem(
                 title = "Contact Support",
                 icon = Icons.Default.Help,
-                onClick = { /* Contact support */ }
+                onClick = {
+                    val intent = Intent(
+                        Intent.ACTION_VIEW,
+                        "https://x.com/AutoCompose_".toUri()
+                    )
+                    context.startActivity(intent)
+                }
             )
 
             SupportItem(
