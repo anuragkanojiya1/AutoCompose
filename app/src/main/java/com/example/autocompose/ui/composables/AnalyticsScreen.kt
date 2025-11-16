@@ -24,13 +24,6 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.autocompose.ui.viewmodel.AutoComposeViewmodel
 import androidx.compose.foundation.Canvas
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Analytics
-import androidx.compose.material.icons.filled.Home
-import androidx.compose.material.icons.filled.Person
-import androidx.compose.material.icons.filled.TrendingUp
-import androidx.compose.material.icons.outlined.Analytics
-import androidx.compose.material.icons.sharp.TrendingUp
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Brush
@@ -39,7 +32,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
 import com.example.autocompose.data.datastore.PreferencesManager
-import com.example.autocompose.ui.navigation.Screen
+import com.example.autocompose.ui.components.BottomBar
 import java.util.Locale
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -114,38 +107,7 @@ fun AnalyticsScreen(autoComposeViewmodel: AutoComposeViewmodel, navController: N
         bottomBar = {
             BottomAppBar(
                 actions = {
-                    Box(
-                        modifier = Modifier.fillMaxWidth(),
-                        contentAlignment = Alignment.Center,
-                    ) {
-                        Row(
-                            horizontalArrangement = Arrangement.Center,
-                            verticalAlignment = Alignment.CenterVertically
-                        ) {
-                            IconButton(
-                                onClick = { navController.navigate(Screen.Home.route) },
-                                modifier = Modifier
-                                    .weight(0.5f)
-                                    .size(64.dp),
-                            ) {
-                                Icon(Icons.Default.Home, contentDescription = "Home",
-                                    modifier = Modifier.size(32.dp)
-                                )
-                            }
-
-                            Spacer(modifier = Modifier.width(32.dp))
-
-                            IconButton(onClick = { navController.navigate(Screen.Analytics.route) },
-                                modifier = Modifier
-                                    .weight(0.5f)
-                                    .size(64.dp)
-                            ) {
-                                Icon(Icons.Default.TrendingUp, contentDescription = "Trends",
-                                    modifier = Modifier.size(32.dp)
-                                )
-                            }
-                        }
-                    }
+                    BottomBar(navController)
                 }
             )
         },
