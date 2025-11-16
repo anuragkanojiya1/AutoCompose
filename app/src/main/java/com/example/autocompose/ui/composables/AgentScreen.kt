@@ -74,8 +74,12 @@ import com.example.autocompose.ui.viewmodel.AutoComposeViewmodel
 import com.example.autocompose.ui.viewmodel.FrequentEmailViewModel
 import android.util.Log
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.Remove
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
 import com.example.autocompose.data.datastore.PreferencesManager
@@ -90,12 +94,16 @@ fun AgentScreen(
     navController: NavController
 ) {
     val primaryBlue = Color(0xFF2196F3)
-    var recipientEmail by remember { mutableStateOf("") }
+
+    var recipientEmails by remember { mutableStateOf(mutableListOf("")) }
+
     var languageExpanded by remember { mutableStateOf(false) }
     var selectedModel by remember { mutableStateOf("Llama") }
     var subject by remember { mutableStateOf("") }
     var emailContent by remember { mutableStateOf("") }
     var emailContext by remember { mutableStateOf("") }
+
+    var count by remember { mutableStateOf(1) }
 
     val generatedEmail = autoComposeViewmodel.generatedEmail.collectAsState()
     val emailSubject = autoComposeViewmodel.subject.collectAsState()
@@ -170,7 +178,7 @@ fun AgentScreen(
         return Intent(Intent.ACTION_SEND).apply {
             type = "message/rfc822"
             setPackage("com.google.android.gm")
-            putExtra(Intent.EXTRA_EMAIL, arrayOf(recipientEmail))
+            putExtra(Intent.EXTRA_EMAIL, recipientEmails.toTypedArray())
             putExtra(Intent.EXTRA_SUBJECT, subject)
             putExtra(Intent.EXTRA_TEXT, emailContent)
         }
@@ -228,19 +236,113 @@ fun AgentScreen(
             ) {
                 Spacer(modifier = Modifier.padding(top = 2.dp))
 
-                OutlinedTextField(
-                    value = recipientEmail,
-                    onValueChange = { recipientEmail = it },
-                    label = { Text("To: Recipient's email", color = Color.Gray) },
-                    modifier = Modifier.fillMaxWidth(),
-                    singleLine = true,
-                    colors = TextFieldDefaults.outlinedTextFieldColors(
-                        unfocusedTextColor = Color.Gray,
-                        unfocusedBorderColor = Color(0xFFE7E6E6),
-                        focusedBorderColor = primaryBlue
-                    ),
-                    shape = RoundedCornerShape(12.dp)
-                )
+                recipientEmails.forEachIndexed { index, email ->
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                        modifier = Modifier.fillMaxWidth()
+                    ) {
+                        OutlinedTextField(
+                            value = email,
+                            onValueChange = { newValue ->
+                                val updatedList = recipientEmails.toMutableList()
+                                updatedList[index] = newValue
+                                recipientEmails = updatedList
+                            },
+                            label = { Text("Recipient Email ${index + 1}", color = Color.Gray) },
+                            modifier = Modifier.weight(1f),
+                            singleLine = true,
+                            colors = TextFieldDefaults.outlinedTextFieldColors(
+                                unfocusedTextColor = Color.Gray,
+                                unfocusedBorderColor = Color(0xFFE7E6E6),
+                                focusedBorderColor = Color(0xFF2196F3)
+                            ),
+                            shape = RoundedCornerShape(12.dp),
+                            trailingIcon = {
+                                Row {
+                                    IconButton(
+                                        onClick = {
+
+                                            recipientEmails = recipientEmails.toMutableList().apply { add("") }
+                                        }
+                                    ) {
+                                        Icon(
+                                            imageVector = Icons.Default.Add,
+                                            contentDescription = "Add recipient"
+                                        )
+                                    }
+
+                                    if (recipientEmails.size > 1) {
+                                        IconButton(
+                                            onClick = {
+
+                                                recipientEmails = recipientEmails.toMutableList().apply { removeAt(index) }
+                                            }
+                                        ) {
+                                            Icon(
+                                                imageVector = Icons.Default.Remove,
+                                                contentDescription = "Remove recipient"
+                                            )
+                                        }
+                                    }
+                                }
+                            }
+                        )
+
+//                        Row {
+//                            IconButton(
+//                                onClick = {
+//
+//                                    recipientEmails = recipientEmails.toMutableList().apply { add("") }
+//                                }
+//                            ) {
+//                                Icon(
+//                                    imageVector = Icons.Default.Add,
+//                                    contentDescription = "Add recipient"
+//                                )
+//                            }
+//
+//                            if (recipientEmails.size > 1) {
+//                                IconButton(
+//                                    onClick = {
+//
+//                                        recipientEmails = recipientEmails.toMutableList().apply { removeAt(index) }
+//                                    }
+//                                ) {
+//                                    Icon(
+//                                        imageVector = Icons.Default.Remove,
+//                                        contentDescription = "Remove recipient"
+//                                    )
+//                                }
+//                            }
+//                        }
+                    }
+                }
+
+//                    for (i in 1..count) {
+//                        OutlinedTextField(
+//                            value = recipientEmail,
+//                            onValueChange = { recipientEmail = it },
+//                            label = { Text("To: Recipient's email", color = Color.Gray) },
+//                            modifier = Modifier.fillMaxWidth(),
+//                            singleLine = true,
+//                            colors = TextFieldDefaults.outlinedTextFieldColors(
+//                                unfocusedTextColor = Color.Gray,
+//                                unfocusedBorderColor = Color(0xFFE7E6E6),
+//                                focusedBorderColor = primaryBlue
+//                            ),
+//                            shape = RoundedCornerShape(12.dp),
+//                            trailingIcon = {
+//                                IconButton(onClick = {
+//                                    count++;
+//                                }) {
+//                                    Icon(
+//                                        imageVector = Icons.Default.Add,
+//                                        contentDescription = ""
+//                                    )
+//                                }
+//                            }
+//                        )
+//                    }
 
                 Card(
                     modifier = Modifier
@@ -516,7 +618,7 @@ fun AgentScreen(
 
                 Button(
                     onClick = {
-                        if (emailContext.isNotEmpty() && recipientEmail.isNotEmpty()) {
+                        if (emailContext.isNotEmpty() && recipientEmails.isNotEmpty()) {
                             // Prevent sending "string" as a value
                             val validTone =
                                 if (selectedTone == "string" || selectedTone.isBlank()) "Professional" else selectedTone
