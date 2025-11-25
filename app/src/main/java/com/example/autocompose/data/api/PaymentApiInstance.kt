@@ -13,7 +13,7 @@ object PaymentApiInstance {
 
     private val TAG = "PaymentAPI"
 
-    private fun apiInstance(isSandbox: Boolean = true): Retrofit {
+    private fun apiInstance(isSandbox: Boolean = false): Retrofit {
         val loggingInterceptor = HttpLoggingInterceptor { message ->
             Log.d(TAG, message)
         }.apply {
