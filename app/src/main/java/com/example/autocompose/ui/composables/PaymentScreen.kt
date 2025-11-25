@@ -533,7 +533,7 @@ fun PaymentScreen(
                     // Keep the redirect logic
                     LaunchedEffect(paymentState.orderId) {
                         val paypalUrl =
-                            "https://www.sandbox.paypal.com/checkoutnow?token=${paymentState.orderId}"
+                            "https://paypal.com/checkoutnow?token=${paymentState.orderId}"
                         Log.d(TAG, "Launching PayPal URL: $paypalUrl")
                         val intent = Intent(Intent.ACTION_VIEW)
                         intent.data = Uri.parse(paypalUrl)
