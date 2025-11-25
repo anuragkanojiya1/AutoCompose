@@ -56,12 +56,10 @@ fun AnalyticsScreen(autoComposeViewmodel: AutoComposeViewmodel, navController: N
     Log.d("AnalyticsScreen", "topLanguages: $topLanguages")
     Log.d("AnalyticsScreen", "topTones: $topTones")
 
-    // Effect to load trends data when the screen is displayed
     LaunchedEffect(Unit) {
         autoComposeViewmodel.getTrends()
     }
 
-    // Set loading to false when data is available
     LaunchedEffect(
         popularModels.value,
         topLanguages.value,
@@ -125,7 +123,6 @@ fun AnalyticsScreen(autoComposeViewmodel: AutoComposeViewmodel, navController: N
         ) {
             Spacer(modifier = Modifier.padding(top = 4.dp))
 
-            // Dashboard Title and Date Selector
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.SpaceBetween,
@@ -155,7 +152,6 @@ fun AnalyticsScreen(autoComposeViewmodel: AutoComposeViewmodel, navController: N
 
             Spacer(modifier = Modifier.height(24.dp))
 
-            // Popular Models Section
             Text(
                 text = "Model Popularity Trends",
                 fontSize = 18.sp,
@@ -165,9 +161,7 @@ fun AnalyticsScreen(autoComposeViewmodel: AutoComposeViewmodel, navController: N
 
             Spacer(modifier = Modifier.height(12.dp))
 
-            // Show shimmer effect or actual content based on loading state
             if (isLoading) {
-                // Shimmer loading for models
                 Row(
                     modifier = Modifier.fillMaxWidth(),
                     horizontalArrangement = Arrangement.spacedBy(8.dp)
@@ -186,12 +180,10 @@ fun AnalyticsScreen(autoComposeViewmodel: AutoComposeViewmodel, navController: N
                     ShimmerModelCard(modifier = Modifier.weight(1f))
                 }
             } else {
-                // Popular Models Cards
                 Row(
                     modifier = Modifier.fillMaxWidth(),
                     horizontalArrangement = Arrangement.spacedBy(8.dp)
                 ) {
-                    // Use the first two models from the list for the first row
                     val models = popularModels.value
                     val totalCount = models.sumOf { it.count }.toFloat()
 
@@ -202,7 +194,6 @@ fun AnalyticsScreen(autoComposeViewmodel: AutoComposeViewmodel, navController: N
                         Log.d("Model", models[0].toString())
                         Log.d("Model", models[1].toString())
                         Log.d("Model", models[2].toString())
-                        // First model card
                         ModelCard(
                             name = firstModel.model,
                             percentage = "%.2f%%".format((firstModel.count.toFloat() / totalCount) * 100),
@@ -212,7 +203,6 @@ fun AnalyticsScreen(autoComposeViewmodel: AutoComposeViewmodel, navController: N
                             modifier = Modifier.weight(1f)
                         )
 
-                        // Second model card
                         ModelCard(
                             name = secondModel.model,
                             percentage = "%.2f%%".format((secondModel.count.toFloat() / totalCount) * 100),
@@ -222,7 +212,6 @@ fun AnalyticsScreen(autoComposeViewmodel: AutoComposeViewmodel, navController: N
                             modifier = Modifier.weight(1f)
                         )
                     } else {
-                        // Fallback to default model cards if not enough data
                         ModelCard(
                             name = "GPT-4",
                             percentage = "43%",
@@ -249,7 +238,6 @@ fun AnalyticsScreen(autoComposeViewmodel: AutoComposeViewmodel, navController: N
                     modifier = Modifier.fillMaxWidth(),
                     horizontalArrangement = Arrangement.spacedBy(8.dp)
                 ) {
-                    // Use the next two models from the list for the second row
                     val models = popularModels.value
                     val totalCount = models.sumOf { it.count }.toFloat()
 
@@ -257,7 +245,6 @@ fun AnalyticsScreen(autoComposeViewmodel: AutoComposeViewmodel, navController: N
                         val thirdModel = models[2]
 //                val fourthModel = models[0]
 
-                        // Third model card
                         ModelCard(
                             name = thirdModel.model,
                             percentage = "%.2f%%".format((thirdModel.count.toFloat() / totalCount) * 100),
@@ -267,7 +254,6 @@ fun AnalyticsScreen(autoComposeViewmodel: AutoComposeViewmodel, navController: N
                             modifier = Modifier.weight(1f)
                         )
 
-//                // Fourth model card
 //                ModelCard(
 //                    name = fourthModel.model,
 //                    percentage = "${((fourthModel.count.toFloat() / totalCount) * 100).toInt()}%",
@@ -276,7 +262,6 @@ fun AnalyticsScreen(autoComposeViewmodel: AutoComposeViewmodel, navController: N
 //                    modifier = Modifier.weight(1f)
 //                )
                     } else {
-                        // Fallback to default model cards if not enough data
                         ModelCard(
                             name = "Claude",
                             percentage = "18%",
@@ -300,7 +285,6 @@ fun AnalyticsScreen(autoComposeViewmodel: AutoComposeViewmodel, navController: N
 
             Spacer(modifier = Modifier.height(24.dp))
 
-            // Language Usage Section
             Text(
                 text = "Global Language Trends",
                 fontSize = 18.sp,
@@ -311,7 +295,6 @@ fun AnalyticsScreen(autoComposeViewmodel: AutoComposeViewmodel, navController: N
             Spacer(modifier = Modifier.height(12.dp))
 
             if (isLoading) {
-                // Shimmer loading for pie chart
                 ShimmerPieChart(modifier = Modifier.fillMaxWidth())
             } else {
                 val languages = topLanguages.value.map { lang ->
@@ -330,7 +313,6 @@ fun AnalyticsScreen(autoComposeViewmodel: AutoComposeViewmodel, navController: N
                         color = getLanguageColor(lang.language)
                     )
                 }.also {
-                    // This ensures we have entries for visualization
                     Log.d(
                         "LanguageDebug",
                         "Final language entries passed to chart: ${it.map { entry -> "${entry.label}:${entry.value}%" }}"
@@ -348,13 +330,10 @@ fun AnalyticsScreen(autoComposeViewmodel: AutoComposeViewmodel, navController: N
                     Log.w("LanguageDebug", "topLanguages value is empty!")
                 }
 
-                // Check if French is present, if not add test data
                 val hasFrench = languages.any { it.label.lowercase(Locale.ROOT) == "french" }
                 Log.d("LanguageDebug", "Has French in language entries: $hasFrench")
 
-                // Only for debugging: Ensure French is visible in the UI
                 val finalLanguages = if (languages.isEmpty()) {
-                    // If no languages at all, use demo data
                     Log.d("LanguageDebug", "No languages available, using demo data")
                     listOf(
                         PieChartEntry(
@@ -369,7 +348,6 @@ fun AnalyticsScreen(autoComposeViewmodel: AutoComposeViewmodel, navController: N
                         )
                     )
                 } else if (!hasFrench) {
-                    // If there's no French specifically, add it
                     Log.d("LanguageDebug", "Adding French entry for debugging")
                     languages + PieChartEntry(
                         value = 15f,
@@ -394,7 +372,6 @@ fun AnalyticsScreen(autoComposeViewmodel: AutoComposeViewmodel, navController: N
 
             Spacer(modifier = Modifier.height(24.dp))
 
-            // Communication Tones Section
             Text(
                 text = "Tone Trends",
                 fontSize = 18.sp,
@@ -405,17 +382,14 @@ fun AnalyticsScreen(autoComposeViewmodel: AutoComposeViewmodel, navController: N
             Spacer(modifier = Modifier.height(12.dp))
 
             if (isLoading) {
-                // Shimmer loading for tone bars
                 ShimmerTonesBarChart(
                     modifier = Modifier
                         .fillMaxWidth()
                         .padding(horizontal = 16.dp)
                 )
             } else {
-                // Display tone bars
                 TonesBarChart(
                     tones = topTones.value.map { tone ->
-                        // Calculate percentage from counts
                         val totalCount = topTones.value.sumOf { it.count }.toFloat()
                         val percentage =
                             if (totalCount > 0) (tone.count.toFloat() / totalCount) * 100f else 0f
@@ -490,7 +464,6 @@ fun LanguagePieChart(
         PieChartEntry(value = 15f, label = "French", color = Color(0xFF7E57C2))
     ),
 ) {
-    // Use provided languages or defaults if empty
     val entries = if (languages.isEmpty()) {
         listOf(
             PieChartEntry(value = 65f, label = "English", color = Color(0xFF8D6E63)),
@@ -498,7 +471,7 @@ fun LanguagePieChart(
             PieChartEntry(value = 15f, label = "French", color = Color(0xFF7E57C2))
         )
     } else {
-        languages.sortedByDescending { it.value } // Sort by value to ensure we show the most important ones
+        languages.sortedByDescending { it.value }
     }
 
     Log.d(
@@ -514,7 +487,6 @@ fun LanguagePieChart(
             modifier = Modifier.fillMaxWidth(),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            // Dynamic angle-based pie chart
             Canvas(modifier = Modifier.size(180.dp)) {
                 val canvasWidth = size.width
                 val canvasHeight = size.height
@@ -539,7 +511,6 @@ fun LanguagePieChart(
                     startAngle += sweepAngle
                 }
 
-                // Draw inner circle for donut effect
                 drawCircle(
                     color = Color.White,
                     radius = radius * 0.6f,
@@ -549,7 +520,6 @@ fun LanguagePieChart(
 
             Spacer(modifier = Modifier.height(16.dp))
 
-            // Legend for the pie chart - show all entries
             Spacer(modifier = Modifier.height(16.dp))
 
             entries.forEach { entry ->
@@ -635,7 +605,6 @@ fun TonesBarChart(
 
                 Spacer(modifier = Modifier.height(4.dp))
 
-                // Bar representation
                 Box(
                     modifier = Modifier
                         .fillMaxWidth()
@@ -696,7 +665,6 @@ fun ShimmerModelCard(modifier: Modifier = Modifier) {
                 .padding(16.dp),
             horizontalAlignment = Alignment.Start
         ) {
-            // Shimmer for icon
             Box(
                 modifier = Modifier
                     .size(24.dp)
@@ -705,7 +673,6 @@ fun ShimmerModelCard(modifier: Modifier = Modifier) {
 
             Spacer(modifier = Modifier.height(16.dp))
 
-            // Shimmer for name
             Box(
                 modifier = Modifier
                     .width(80.dp)
@@ -715,7 +682,6 @@ fun ShimmerModelCard(modifier: Modifier = Modifier) {
 
             Spacer(modifier = Modifier.height(8.dp))
 
-            // Shimmer for percentage
             Box(
                 modifier = Modifier
                     .width(40.dp)
@@ -759,7 +725,6 @@ fun ShimmerPieChart(modifier: Modifier = Modifier) {
             modifier = Modifier.fillMaxWidth(),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            // Shimmer for pie chart
             Box(
                 modifier = Modifier
                     .size(180.dp)
@@ -769,7 +734,6 @@ fun ShimmerPieChart(modifier: Modifier = Modifier) {
 
             Spacer(modifier = Modifier.height(16.dp))
 
-            // Shimmer for legend items
             repeat(3) {
                 Row(
                     modifier = Modifier
@@ -850,7 +814,6 @@ fun ShimmerTonesBarChart(modifier: Modifier = Modifier) {
                     horizontalArrangement = Arrangement.SpaceBetween,
                     verticalAlignment = Alignment.CenterVertically
                 ) {
-                    // Shimmer for tone label
                     Box(
                         modifier = Modifier
                             .width(100.dp)
@@ -858,7 +821,6 @@ fun ShimmerTonesBarChart(modifier: Modifier = Modifier) {
                             .background(brush)
                     )
 
-                    // Shimmer for percentage
                     Box(
                         modifier = Modifier
                             .width(40.dp)
@@ -869,7 +831,6 @@ fun ShimmerTonesBarChart(modifier: Modifier = Modifier) {
 
                 Spacer(modifier = Modifier.height(4.dp))
 
-                // Shimmer for bar
                 Box(
                     modifier = Modifier
                         .fillMaxWidth()
