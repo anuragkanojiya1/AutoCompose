@@ -13,6 +13,9 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
+      - name: Make gradlew executable
+        run: chmod +x ./gradlew
+
       - name: Set up Java
         uses: actions/setup-java@v4
         with:
@@ -23,24 +26,24 @@ jobs:
         uses: gradle/gradle-build-action@v3
 
       - name: Decode Keystore
-        run: |
-          echo "$KEYSTORE_BASE64" | base64 --decode > app/my-release-key.jks
+        run: echo "$KEYSTORE_BASE64" | base64 --decode > app/my-release-key.jks
 
       - name: Build Release
-        run: ./gradlew clean assembleRelease bundleRelease \
-          -Pandroid.injected.signing.store.file=app/my-release-key.jks \
-          -Pandroid.injected.signing.store.password=$KEYSTORE_PASSWORD \
-          -Pandroid.injected.signing.key.alias=$KEY_ALIAS \
-          -Pandroid.injected.signing.key.password=$KEY_PASSWORD
+        run: ./gradlew clean assembleRelease bundleRelease
 
-      - name: List Outputs
+      - name: List release outputs
         run: ls -R app/build/outputs/
 
-      - name: Upload Release Assets
+      - name: Upload Release APK
         uses: softprops/action-gh-release@v2
         with:
-          files: |
-            app/build/outputs/apk/release/app-release.apk
-            app/build/outputs/bundle/release/app-release.aab
+          files: app/build/outputs/apk/release/app-release.apk
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Upload Release AAB
+        uses: softprops/action-gh-release@v2
+        with:
+          files: app/build/outputs/bundle/release/app-release.aab
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
