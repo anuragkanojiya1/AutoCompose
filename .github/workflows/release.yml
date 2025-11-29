@@ -28,7 +28,7 @@ jobs:
         uses: gradle/gradle-build-action@v3
 
       - name: Decode Keystore
-        run: echo "$KEYSTORE_BASE64" | base64 --decode > app/release-key.jks
+        run: echo "$KEYSTORE_BASE64" | base64 --decode > app/my-release-key.jks
 
       - name: Build Release
         run: |
