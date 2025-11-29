@@ -25,18 +25,23 @@ android {
         }
     }
 
-    signingConfigs {
-        create("release") {
-            storeFile = file("my-release-key.jks")
-            storePassword = System.getenv("KEYSTORE_PASSWORD")
-            keyAlias = System.getenv("KEY_ALIAS")
-            keyPassword = System.getenv("KEY_PASSWORD")
-        }
-    }
+//    signingConfigs {
+//        create("release") {
+//            val keystoreFile = file("my-release-key.jks")
+//            if (keystoreFile.exists()) {
+//                storeFile = keystoreFile
+//                storePassword = System.getenv("KEYSTORE_PASSWORD")
+//                keyAlias = System.getenv("KEY_ALIAS")
+//                keyPassword = System.getenv("KEY_PASSWORD")
+//            } else {
+//                println("⚠️ Release keystore not found. Release build will be unsigned.")
+//            }
+//        }
+//    }
 
     buildTypes {
-        getByName("release") {
-            signingConfig = signingConfigs.getByName("release")
+        release {
+
             isMinifyEnabled = true
             isShrinkResources = true
             proguardFiles(
@@ -45,6 +50,7 @@ android {
             )
         }
     }
+
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_17
         targetCompatibility = JavaVersion.VERSION_17
