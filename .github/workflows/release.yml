@@ -33,7 +33,7 @@ jobs:
       - name: Build Release
         run: |
           ./gradlew clean assembleRelease bundleRelease \
-          -Pandroid.injected.signing.store.file=app/release-key.jks \
+          -Pandroid.injected.signing.store.file=app/my-release-key.jks \
           -Pandroid.injected.signing.store.password=$KEYSTORE_PASSWORD \
           -Pandroid.injected.signing.key.alias=$KEY_ALIAS \
           -Pandroid.injected.signing.key.password=$KEY_PASSWORD
