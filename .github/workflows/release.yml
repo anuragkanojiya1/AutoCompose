@@ -31,7 +31,8 @@ jobs:
         run: echo "$KEYSTORE_BASE64" | base64 --decode > app/release-key.jks
 
       - name: Build Release
-        run: ./gradlew clean assembleRelease bundleRelease \
+        run: |
+          ./gradlew clean assembleRelease bundleRelease \
           -Pandroid.injected.signing.store.file=app/release-key.jks \
           -Pandroid.injected.signing.store.password=$KEYSTORE_PASSWORD \
           -Pandroid.injected.signing.key.alias=$KEY_ALIAS \
