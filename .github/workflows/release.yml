@@ -22,11 +22,8 @@ jobs:
       - name: Setup Gradle
         uses: gradle/gradle-build-action@v3
 
-      - name: Decode Keystore
-        run: |
-          echo "$KEYSTORE_BASE64" | base64 --decode > release.keystore
-        env:
-          KEYSTORE_BASE64: ${{ secrets.KEYSTORE_BASE64 }}
+      - name: Decode keystore
+        run: echo "${{ secrets.KEYSTORE_BASE64 }}" | base64 --decode > release.keystore
 
       - name: Build Release APK and AAB
         run: |
