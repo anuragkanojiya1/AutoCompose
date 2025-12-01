@@ -30,7 +30,7 @@ jobs:
 
       - name: Build Release APK and AAB
         run: |
-          ./gradlew clean assembleRelease bundleRelease \
+          ./gradlew clean assembleRelease bundleRelease 
             -Pandroid.injected.signing.store.file=release.keystore \
             -Pandroid.injected.signing.store.password=${{ secrets.KEYSTORE_PASSWORD }} \
             -Pandroid.injected.signing.key.alias=${{ secrets.KEY_ALIAS }} \
