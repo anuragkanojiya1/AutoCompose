@@ -3,7 +3,7 @@ name: Release Build
 on:
   push:
     tags:
-      - 'v*.*.*'  
+      - 'v*.*.*'
 
 jobs:
   build:
@@ -27,7 +27,7 @@ jobs:
 
       - name: Build Release APK and AAB
         run: |
-          ./gradlew clean assembleRelease bundleRelease 
+          ./gradlew clean assembleRelease bundleRelease \
             -Pandroid.injected.signing.store.file=release.keystore \
             -Pandroid.injected.signing.store.password=${{ secrets.KEYSTORE_PASSWORD }} \
             -Pandroid.injected.signing.key.alias=${{ secrets.KEY_ALIAS }} \
@@ -45,7 +45,6 @@ jobs:
         uses: softprops/action-gh-release@v1
         with:
           tag_name: ${{ github.ref_name }}
-          name: MyApp-${{ github.ref_name }}.apk
           files: app/build/outputs/apk/release/app-release.apk
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
