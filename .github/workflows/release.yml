@@ -1,44 +1,64 @@
-name: Release Build of AutoCompose
+name: Android Release CI/CD
 
 on:
   push:
     tags:
-      - 'v*.*.*'
+      - "v*"
 
 jobs:
   build:
+    name: Build Release APK
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4
+    - name: Checkout code
+      uses: actions/checkout@v3
 
-      - name: Setup Java
-        uses: actions/setup-java@v4
-        with:
-          distribution: 'temurin'
-          java-version: '17'
+    - name: Set up JDK
+      uses: actions/setup-java@v4
+      with:
+        distribution: 'temurin'
+        java-version: '17'
 
-      - name: Setup Gradle
-        uses: gradle/gradle-build-action@v3
+    - name: Decode google-services.json
+      run: echo "$GOOGLE_SERVICES_JSON" | base64 -d > app/google-services.json
+      env:
+        GOOGLE_SERVICES_JSON: ${{ secrets.GOOGLE_SERVICES_JSON }}
 
-      - name: Decode keystore
-        run: echo "${{ secrets.KEYSTORE_BASE64 }}" | base64 --decode > release.keystore
+      
+    - name: Decode Keystore
+      if: env.KEYSTORE_BASE64 != ''
+      run: echo "$KEYSTORE_BASE64" | base64 --decode > app/keystore.jks
+      env:
+        KEYSTORE_BASE64: ${{ secrets.KEYSTORE_BASE64 }}
 
-      - name: Build Release APK
-        run: |
-          ./gradlew clean assembleRelease bundleRelease \
-            -Pandroid.injected.signing.store.file=release.keystore \
-            -Pandroid.injected.signing.store.password=${{ secrets.KEYSTORE_PASSWORD }} \
-            -Pandroid.injected.signing.key.alias=${{ secrets.KEY_ALIAS }} \
-            -Pandroid.injected.signing.key.password=${{ secrets.KEY_PASSWORD }}
+    - name: Make gradlew executable
+      run: chmod +x ./gradlew
 
-      - name: Upload to Release
-        uses: softprops/action-gh-release@v1
-        with:
-          tag_name: ${{ github.ref_name }}
-          files: |
-            app/build/outputs/apk/release/app-release.apk
-            app/build/outputs/bundle/release/app-release.aab
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+    - name: Build Signed APK
+      run: ./gradlew assembleRelease
+      env:
+        KEYSTORE_PASSWORD: ${{ secrets.KEYSTORE_PASSWORD }}
+        KEY_ALIAS: ${{ secrets.KEY_ALIAS }}
+        KEY_PASSWORD: ${{ secrets.KEY_PASSWORD }}
+
+    - name: Find APK
+      id: apk-path
+      run: echo "APK_PATH=$(find app/build/outputs/apk/release -name '*.apk')" >> $GITHUB_ENV
+
+    - name: Create GitHub Release
+      uses: softprops/action-gh-release@v2
+      with:
+        tag_name: ${{ github.ref_name }}
+        name: Release ${{ github.ref_name }}
+        body: |
+          🚀 **Auto-generated Release**
+          Version: ${{ github.ref_name }}
+
+          ✨ Changes:
+          - This APK was built automatically using GitHub Actions
+          - Add real changelog in your tag message
+        files: |
+          ${{ env.APK_PATH }}
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
