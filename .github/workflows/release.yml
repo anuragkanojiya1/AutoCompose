@@ -20,20 +20,29 @@ jobs:
         distribution: 'temurin'
         java-version: '17'
 
+    - name: Make gradlew executable
+      run: chmod +x ./gradlew
+
+    - name: Clean project
+      run: ./gradlew clean
+      
     - name: Decode google-services.json
       run: echo "$GOOGLE_SERVICES_JSON" | base64 -d > app/google-services.json
       env:
         GOOGLE_SERVICES_JSON: ${{ secrets.GOOGLE_SERVICES_JSON }}
 
-      
+    - name: Reconstruct Constants.kt
+      run: |
+        mkdir -p app/src/main/java/com/example/autocompose/utils
+        echo "$CONSTANTS_KT" | base64 -d > app/src/main/java/com/example/autocompose/utils/Constants.kt
+      env:
+        CONSTANTS_KT: ${{ secrets.CONSTANTS_KT }}
+
     - name: Decode Keystore
-      if: env.KEYSTORE_BASE64 != ''
+      if: ${{ secrets.KEYSTORE_BASE64 != '' }}
       run: echo "$KEYSTORE_BASE64" | base64 --decode > app/keystore.jks
       env:
         KEYSTORE_BASE64: ${{ secrets.KEYSTORE_BASE64 }}
-
-    - name: Make gradlew executable
-      run: chmod +x ./gradlew
 
     - name: Build Signed APK
       run: ./gradlew assembleRelease
@@ -58,7 +67,6 @@ jobs:
           ✨ Changes:
           - This APK was built automatically using GitHub Actions
           - Add real changelog in your tag message
-        files: |
-          ${{ env.APK_PATH }}
+        files: ${{ env.APK_PATH }}
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
