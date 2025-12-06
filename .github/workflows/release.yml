@@ -39,7 +39,7 @@ jobs:
         CONSTANTS_KT: ${{ secrets.CONSTANTS_KT }}
 
     - name: Decode Keystore
-      if: ${{ secrets.KEYSTORE_BASE64 != '' }}
+      if: secrets.KEYSTORE_BASE64 != '' 
       run: echo "$KEYSTORE_BASE64" | base64 --decode > app/keystore.jks
       env:
         KEYSTORE_BASE64: ${{ secrets.KEYSTORE_BASE64 }}
