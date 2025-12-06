@@ -19,3 +19,91 @@
 # If you keep the line number information, uncomment this to
 # hide the original source file name.
 #-renamesourcefileattribute SourceFile
+
+############################################################
+# KEEP KOTLIN METADATA (required for Compose, Room, Nav)
+############################################################
+-keepclassmembers class kotlin.Metadata { *; }
+
+
+############################################################
+# KEEP JETPACK COMPOSE RUNTIME
+############################################################
+-keep class androidx.compose.** { *; }
+-dontwarn androidx.compose.**
+
+
+############################################################
+# KEEP NAVIGATION COMPOSE
+############################################################
+-keep class androidx.navigation.** { *; }
+-dontwarn androidx.navigation.**
+
+
+############################################################
+# KEEP LIFECYCLE + VIEWMODEL
+############################################################
+-keep class androidx.lifecycle.** { *; }
+-dontwarn androidx.lifecycle.**
+
+
+############################################################
+# KEEP ROOM (Runtime + KSP generated classes)
+############################################################
+-keep class androidx.room.** { *; }
+-keep class * extends androidx.room.RoomDatabase
+-keepclassmembers class * {
+    @androidx.room.* <methods>;
+}
+
+
+############################################################
+# RETROFIT (reflective interface calls)
+############################################################
+-keep class retrofit2.** { *; }
+-dontwarn retrofit2.**
+
+############################################################
+# GSON (reflective JSON serialization)
+############################################################
+-keep class com.google.gson.** { *; }
+-keep class * implements com.google.gson.TypeAdapterFactory
+-keep class * implements com.google.gson.JsonSerializer
+-keep class * implements com.google.gson.JsonDeserializer
+-keepattributes Signature
+-keepattributes *Annotation*
+
+
+############################################################
+# DATASTORE PREFERENCES
+############################################################
+-keep class androidx.datastore.** { *; }
+-dontwarn androidx.datastore.**
+
+
+############################################################
+# COROUTINES
+############################################################
+-dontwarn kotlinx.coroutines.**
+-keep class kotlinx.coroutines.** { *; }
+
+
+############################################################
+# COIL (uses reflection)
+############################################################
+-dontwarn coil.**
+-keep class coil.** { *; }
+
+
+############################################################
+# PAYPAL SDK
+############################################################
+-keep class com.paypal.** { *; }
+-dontwarn com.paypal.**
+
+
+############################################################
+# LOTTIE (reflection for animations)
+############################################################
+-keep class com.airbnb.lottie.** { *; }
+-dontwarn com.airbnb.lottie.**
