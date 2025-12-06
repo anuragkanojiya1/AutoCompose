@@ -32,7 +32,8 @@ jobs:
         GOOGLE_SERVICES_JSON: ${{ secrets.GOOGLE_SERVICES_JSON }}
 
     - name: Reconstruct Constants.kt
-      run: mkdir -p app/src/main/java/com/example/autocompose/utils
+      run: |
+        mkdir -p app/src/main/java/com/example/autocompose/utils
         echo "$CONSTANTS_KT" | base64 -d > app/src/main/java/com/example/autocompose/utils/Constants.kt
       env:
         CONSTANTS_KT: ${{ secrets.CONSTANTS_KT }}
