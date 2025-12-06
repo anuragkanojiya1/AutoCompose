@@ -42,7 +42,7 @@ jobs:
         CONSTANTS_KT: ${{ secrets.CONSTANTS_KT }}
 
     - name: Decode Keystore
-      run: echo "$KEYSTORE_BASE64" | base64 --decode > app/keystore.jks
+      run: echo "$KEYSTORE_BASE64" | base64 --decode > app/my-release-key.jks
       env:
         KEYSTORE_BASE64: ${{ secrets.KEYSTORE_BASE64 }}
 
