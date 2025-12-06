@@ -3,7 +3,7 @@ name: Android Release CI/CD
 on:
   push:
     tags:
-      - "v*.*"
+      - "v*.*.*"
 
 permissions:
   contents: write
