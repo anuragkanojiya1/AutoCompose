@@ -25,7 +25,12 @@ jobs:
       env:
         GOOGLE_SERVICES_JSON: ${{ secrets.GOOGLE_SERVICES_JSON }}
 
-      
+    - name: Reconstruct Constants.kt
+      run: mkdir -p app/src/main/java/com/example/autocompose/utils
+        echo "$CONSTANTS_KT" | base64 -d > app/src/main/java/com/example/autocompose/utils/Constants.kt
+      env:
+        CONSTANTS_KT: ${{ secrets.CONSTANTS_KT }}
+        
     - name: Decode Keystore
       if: env.KEYSTORE_BASE64 != ''
       run: echo "$KEYSTORE_BASE64" | base64 --decode > app/keystore.jks
