@@ -37,6 +37,7 @@ jobs:
         echo "$CONSTANTS_KT" | base64 -d > app/src/main/java/com/example/autocompose/utils/Constants.kt
       env:
         CONSTANTS_KT: ${{ secrets.CONSTANTS_KT }}
+
         
     - name: Decode Keystore
       if: env.KEYSTORE_BASE64 != ''
