@@ -38,9 +38,8 @@ jobs:
       env:
         CONSTANTS_KT: ${{ secrets.CONSTANTS_KT }}
 
-        
     - name: Decode Keystore
-      if: env.KEYSTORE_BASE64 != ''
+      if: ${{ secrets.KEYSTORE_BASE64 != '' }}
       run: echo "$KEYSTORE_BASE64" | base64 --decode > app/keystore.jks
       env:
         KEYSTORE_BASE64: ${{ secrets.KEYSTORE_BASE64 }}
@@ -68,7 +67,6 @@ jobs:
           ✨ Changes:
           - This APK was built automatically using GitHub Actions
           - Add real changelog in your tag message
-        files: |
-          ${{ env.APK_PATH }}
+        files: ${{ env.APK_PATH }}
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
