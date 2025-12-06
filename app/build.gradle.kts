@@ -25,19 +25,14 @@ android {
         }
     }
 
-//    signingConfigs {
-//        create("release") {
-//            val keystoreFile = file("my-release-key.jks")
-//            if (keystoreFile.exists()) {
-//                storeFile = keystoreFile
-//                storePassword = System.getenv("KEYSTORE_PASSWORD")
-//                keyAlias = System.getenv("KEY_ALIAS")
-//                keyPassword = System.getenv("KEY_PASSWORD")
-//            } else {
-//                println("⚠️ Release keystore not found. Release build will be unsigned.")
-//            }
-//        }
-//    }
+    signingConfigs {
+        create("release") {
+                storeFile = file("keystore.jks")
+                storePassword = System.getenv("KEYSTORE_PASSWORD")
+                keyAlias = System.getenv("KEY_ALIAS")
+                keyPassword = System.getenv("KEY_PASSWORD")
+        }
+    }
 
     buildTypes {
         release {
