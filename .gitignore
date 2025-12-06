@@ -71,5 +71,5 @@ reports/
 # Exclude constants if needed
 **/Constants.kt
 
-/keystore-base64.txt
+/base64.txt
 /my-release-key.jks
