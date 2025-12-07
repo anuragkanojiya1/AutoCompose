@@ -61,12 +61,18 @@ jobs:
 
     - name: Read tag message
       run: |
-        echo "TAG_MESSAGE<<EOF" >> $GITHUB_ENV
-        git tag -l --format='%(contents)' "${GITHUB_REF_NAME}" >> $GITHUB_ENV
-        echo "EOF" >> $GITHUB_ENV
+        TAG_CONTENT=$(git for-each-ref refs/tags/${GITHUB_REF_NAME} --format='%(contents)')
+        {
+          echo "TAG_MESSAGE<<EOF"
+          echo "${TAG_CONTENT}"
+          echo "EOF"
+        } >> $GITHUB_ENV
 
     - name: Debug tag message
-      run: echo "${TAG_MESSAGE}"
+      run: |
+        echo "----- TAG MESSAGE -----"
+        printf "%s\n" "$TAG_MESSAGE"
+        echo "------------------------"
 
     - name: Create GitHub Release
       uses: softprops/action-gh-release@v2
