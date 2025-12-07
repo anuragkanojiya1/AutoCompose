@@ -59,7 +59,12 @@ jobs:
 
     - name: Read tag message
       id: tag_message
-      run: echo "TAG_MESSAGE=$(git tag -l --format='%(contents)' ${{ github.ref_name }})" >> $GITHUB_ENV
+      run: |
+        {
+          echo "TAG_MESSAGE<<EOF"
+          git tag -l --format='%(contents)' ${{ github.ref_name }}
+          echo "EOF"
+        } >> $GITHUB_ENV
 
     - name: Create GitHub Release
       uses: softprops/action-gh-release@v2
@@ -76,3 +81,4 @@ jobs:
         files: ${{ env.APK_PATH }}
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
