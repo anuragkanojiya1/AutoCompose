@@ -57,18 +57,22 @@ jobs:
       id: apk-path
       run: echo "APK_PATH=$(find app/build/outputs/apk/release -name '*.apk')" >> $GITHUB_ENV
 
+    - name: Read tag message
+      id: tag_message
+      run: echo "TAG_MESSAGE=$(git tag -l --format='%(contents)' ${{ github.ref_name }})" >> $GITHUB_ENV
+
     - name: Create GitHub Release
       uses: softprops/action-gh-release@v2
       with:
         tag_name: ${{ github.ref_name }}
         name: Release ${{ github.ref_name }}
         body: |
-          🚀 **Auto-generated Release**
-          Version: ${{ github.ref_name }}
+          🚀 **Release Notes for ${{ github.ref_name }}**
 
-          ✨ Changes:
-          - This APK was built automatically using GitHub Actions
-          - Add real changelog in your tag message
+          ${{ env.TAG_MESSAGE }}
+
+          📦 **Build Info**
+          - APK was built automatically using GitHub Actions
         files: ${{ env.APK_PATH }}
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
