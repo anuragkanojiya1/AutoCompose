@@ -60,13 +60,13 @@ jobs:
       run: echo "APK_PATH=$(find app/build/outputs/apk/release -name '*.apk')" >> $GITHUB_ENV
 
     - name: Read tag message
-      id: tag_message
       run: |
-        {
-          echo "TAG_MESSAGE<<EOF"
-          git tag -l --format='%(contents)' ${{ github.ref_name }}
-          echo "EOF"
-        } >> $GITHUB_ENV
+        echo "TAG_MESSAGE<<EOF" >> $GITHUB_ENV
+        git tag -l --format='%(contents)' "${GITHUB_REF_NAME}" >> $GITHUB_ENV
+        echo "EOF" >> $GITHUB_ENV
+
+    - name: Debug tag message
+      run: echo "${TAG_MESSAGE}"
 
     - name: Create GitHub Release
       uses: softprops/action-gh-release@v2
