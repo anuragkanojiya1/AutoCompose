@@ -59,6 +59,12 @@ jobs:
       id: apk-path
       run: echo "APK_PATH=$(find app/build/outputs/apk/release -name '*.apk')" >> $GITHUB_ENV
 
+    - name: Rename APK with App Name + Tag
+      run: |
+        NEW_NAME="AutoCompose-${{ github.ref_name }}.apk"
+        mv $APK_PATH app/build/outputs/apk/release/$NEW_NAME
+        echo "APK_PATH=app/build/outputs/apk/release/$NEW_NAME" >> $GITHUB_ENV
+        
     - name: Load Tag Message
       if: startsWith(github.ref, 'refs/tags/')
       run: |
