@@ -87,7 +87,7 @@ jobs:
         body: |
           🚀 **Release Notes for ${{ github.ref_name }}**
 
-          -${{ env.TAG_MESSAGE }}
+          - ${{ env.TAG_MESSAGE }}
 
           ---
 
