@@ -1,4 +1,4 @@
-name: Android Release CI/CD for AutoCompose
+name: Android Release CI/CD
 
 on:
   push:
