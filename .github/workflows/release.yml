@@ -96,9 +96,6 @@ jobs:
           - Jetpack Compose UI with Light/Dark mode support                                
           - MVVM architecture, Retrofit networking, FastAPI backend with LangGraph AI pipelines
           
-          # 📦 **Build Info**
-          # - APK was built automatically using GitHub Actions
-          
         files: ${{ env.APK_PATH }}
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
