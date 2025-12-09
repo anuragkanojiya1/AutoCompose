@@ -83,8 +83,22 @@ jobs:
 
           ${{ env.TAG_MESSAGE }}
 
-          📦 **Build Info**
-          - APK was built automatically using GitHub Actions
+          ---
+
+          Download the apk of AutoCompose from down below!
+
+          💌 AutoCompose — AI-Powered Multilingual Email Agent                                                                              
+          - AI email generation in multiple languages (English, French, Spanish, Japanese) with tone selection                                                                 
+          - Voice input for composing emails                                               
+          - Smart draft system with local Room database storage                            
+          - Gmail integration via one-tap send                                             
+          - Trends dashboard powered by Supabase (AI models, languages, tone analytics)    
+          - Jetpack Compose UI with Light/Dark mode support                                
+          - MVVM architecture, Retrofit networking, FastAPI backend with LangGraph AI pipelines
+          
+          # 📦 **Build Info**
+          # - APK was built automatically using GitHub Actions
+          
         files: ${{ env.APK_PATH }}
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
