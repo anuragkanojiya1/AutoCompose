@@ -25,13 +25,11 @@
 ############################################################
 -keepclassmembers class kotlin.Metadata { *; }
 
-
 ############################################################
 # KEEP JETPACK COMPOSE RUNTIME
 ############################################################
 -keep class androidx.compose.** { *; }
 -dontwarn androidx.compose.**
-
 
 ############################################################
 # KEEP NAVIGATION COMPOSE
@@ -39,13 +37,11 @@
 -keep class androidx.navigation.** { *; }
 -dontwarn androidx.navigation.**
 
-
 ############################################################
 # KEEP LIFECYCLE + VIEWMODEL
 ############################################################
 -keep class androidx.lifecycle.** { *; }
 -dontwarn androidx.lifecycle.**
-
 
 ############################################################
 # KEEP ROOM (Runtime + KSP generated classes)
@@ -55,7 +51,6 @@
 -keepclassmembers class * {
     @androidx.room.* <methods>;
 }
-
 
 ############################################################
 # RETROFIT (reflective interface calls)
@@ -73,20 +68,17 @@
 -keepattributes Signature
 -keepattributes *Annotation*
 
-
 ############################################################
 # DATASTORE PREFERENCES
 ############################################################
 -keep class androidx.datastore.** { *; }
 -dontwarn androidx.datastore.**
 
-
 ############################################################
 # COROUTINES
 ############################################################
 -dontwarn kotlinx.coroutines.**
 -keep class kotlinx.coroutines.** { *; }
-
 
 ############################################################
 # COIL (uses reflection)
@@ -108,16 +100,13 @@
 -keep class com.airbnb.lottie.** { *; }
 -dontwarn com.airbnb.lottie.**
 
-# Keep PayPal response model
--keep class com.example.autocompose.domain.paymentResponseModels.TokenResponse { *; }
-
 # Keep Gson annotations
 -keep class com.google.gson.annotations.SerializedName { *; }
 
 # Keep all Gson classes
 -keep class com.google.gson.** { *; }
 
--keep class com.example.autocompose.utils.Constants {
-    *;
-}
+-keep class com.example.autocompose.data.** { *; }
+-keep class com.example.autocompose.domain.** { *; }
+-keep class com.example.autocompose.utils.** { *; }
 
