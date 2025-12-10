@@ -116,3 +116,8 @@
 
 # Keep all Gson classes
 -keep class com.google.gson.** { *; }
+
+-keep class com.example.autocompose.utils.Constants {
+    *;
+}
+
