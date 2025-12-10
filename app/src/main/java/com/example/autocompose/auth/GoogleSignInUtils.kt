@@ -204,6 +204,7 @@ class GoogleSignInUtils {
             return GetGoogleIdOption.Builder()
                 .setFilterByAuthorizedAccounts(false)
                 .setAutoSelectEnabled(false)
+                .setNonce("")
                 .setServerClientId(context.getString(R.string.web_client_id))
                 .build()
         }

@@ -57,7 +57,6 @@ import com.google.android.gms.common.api.GoogleApi
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.GoogleAuthProvider
 import com.google.firebase.auth.ktx.auth
-import com.google.firebase.ktx.Firebase
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.coroutineScope
@@ -282,8 +281,8 @@ fun LogInScreen(navController: NavController, auth: FirebaseAuth) {
 @Preview(showBackground = true)
 @Composable
 fun LogInPreview(){
-    AutoComposeTheme {
-        LogInScreen(navController = rememberNavController(),
-            auth = Firebase.auth)
-    }
+//    AutoComposeTheme {
+//        LogInScreen(navController = rememberNavController(),
+//            auth = Firebase.auth)
+//    }
 }

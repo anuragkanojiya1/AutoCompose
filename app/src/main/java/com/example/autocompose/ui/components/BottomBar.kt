@@ -39,7 +39,7 @@ fun BottomBar(navController: NavController){
     val isSelectedH = currentRoute == homeRoute
     val isSelectedA = currentRoute == analyticsRoute
 
-    val glowColor = if (isSelectedH || isSelectedA) MaterialTheme.colorScheme.primary else Color.Transparent
+    val glowColor = if (isSelectedH || isSelectedA) MaterialTheme.colorScheme.surfaceTint else Color.Transparent
 
     Box(
         modifier = Modifier.fillMaxWidth(),

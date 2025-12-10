@@ -60,7 +60,6 @@ import com.example.autocompose.ui.navigation.Screen
 import com.example.autocompose.ui.theme.AutoComposeTheme
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.ktx.auth
-import com.google.firebase.ktx.Firebase
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -311,9 +310,9 @@ fun SignUpScreen(navController: NavController, auth: FirebaseAuth) {
 @Composable
 @Preview(showBackground = true)
 fun SignUpScreenPreview() {
-    AutoComposeTheme {
-        SignUpScreen(navController = rememberNavController(),
-            auth = Firebase.auth
-        )
-    }
+//    AutoComposeTheme {
+//        SignUpScreen(navController = rememberNavController(),
+//            auth = Firebase.auth
+//        )
+//    }
 }

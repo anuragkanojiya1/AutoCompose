@@ -84,16 +84,16 @@ fun GoogleSignInButton(navController: NavController) {
         modifier = Modifier
             .fillMaxWidth()
             .padding(vertical = 4.dp)
-            .clickable {
-                GoogleSignInUtils.doGoogleSignIn(
-                    context = context,
-                    scope = scope,
-                    launcher = launcher,
-                    login = {
-                        Toast.makeText(context, "Login successful", Toast.LENGTH_SHORT).show()
-                    }
-                )
-            }
+//            .clickable {
+//                GoogleSignInUtils.doGoogleSignIn(
+//                    context = context,
+//                    scope = scope,
+//                    launcher = launcher,
+//                    login = {
+//                        Toast.makeText(context, "Login successful", Toast.LENGTH_SHORT).show()
+//                    }
+//                )
+//            }
     ) {
         Button(
             onClick = {
