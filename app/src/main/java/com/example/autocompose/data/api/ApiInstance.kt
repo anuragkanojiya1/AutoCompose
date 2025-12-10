@@ -22,5 +22,5 @@ object ApiInstance {
             .build()
     }
 
-    val api: Api =apiInstance().create(Api::class.java)
+    val api: Api = apiInstance().create(Api::class.java)
 }
