@@ -51,9 +51,12 @@ class PaymentViewModel : ViewModel() {
                     "$clientId:$secretKey".toByteArray(),
                     android.util.Base64.NO_WRAP
                 )
+
                 Log.d(TAG, "Making token request to PayPal API")
 
                 val response = PaymentApiInstance.api.getAccessToken(authHeader)
+
+                Log.d(TAG, "Raw token response = ${response.raw()}")
 
                 if (response.isSuccessful) {
                     val tokenResponse = response.body()
