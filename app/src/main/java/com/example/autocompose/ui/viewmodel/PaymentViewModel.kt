@@ -7,11 +7,13 @@ import androidx.lifecycle.viewModelScope
 import com.example.autocompose.data.api.PaymentApiInstance
 import com.example.autocompose.domain.paymentResponseModels.PayPalCaptureResponse
 import com.example.autocompose.utils.Constants
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import okhttp3.MediaType.Companion.toMediaType
 import okhttp3.RequestBody.Companion.toRequestBody
 import org.json.JSONArray
@@ -22,6 +24,7 @@ import java.util.UUID
 data class PaymentState(
     val isLoading: Boolean = false,
     val orderId: String? = null,
+    val approvalUrl: String? = null,       // approval link to open in browser
     val isSuccess: Boolean = false,
     val error: String? = null,
     val accessToken: String? = null,
@@ -30,8 +33,7 @@ data class PaymentState(
 
 class PaymentViewModel : ViewModel() {
 
-    // Use the existing constant from Constants object
-    val clientId = Constants.PUBLISHABLE_KEY
+    private val clientId = Constants.PUBLISHABLE_KEY
     private val secretKey = Constants.SECRET_KEY
     private val returnUrl = "com.example.autocompose://paypalpay"
     private val TAG = "PaymentViewModel"
@@ -39,91 +41,142 @@ class PaymentViewModel : ViewModel() {
     private val _paymentState = MutableStateFlow(PaymentState())
     val paymentState: StateFlow<PaymentState> = _paymentState.asStateFlow()
 
-    // Fetch access token first
+    // Public wrapper to fetch token (keeps old call sites working)
     fun fetchAccessToken() {
-        Log.d(TAG, "Fetching PayPal access token...")
-        _paymentState.update { it.copy(isLoading = true, error = null) }
+        viewModelScope.launch { ensureAccessToken() }
+    }
 
-        viewModelScope.launch {
-            try {
-                // Create auth header for OAuth
-                val authHeader = "Basic " + android.util.Base64.encodeToString(
-                    "$clientId:$secretKey".toByteArray(),
-                    android.util.Base64.NO_WRAP
-                )
+    // Ensures we have a token. Returns true if token is present/obtained.
+    private suspend fun ensureAccessToken(): Boolean = withContext(Dispatchers.IO) {
+        if (_paymentState.value.accessToken != null) {
+            Log.d(TAG, "Access token already present")
+            return@withContext true
+        }
 
-                Log.d(TAG, "Making token request to PayPal API")
+        try {
+            _paymentState.update { it.copy(isLoading = true, error = null) }
 
-                val response = PaymentApiInstance.api.getAccessToken(authHeader)
+            val authHeader = "Basic " + android.util.Base64.encodeToString(
+                "$clientId:$secretKey".toByteArray(),
+                android.util.Base64.NO_WRAP
+            )
 
-                Log.d(TAG, "Raw token response = ${response.raw()}")
+            Log.d(TAG, "Making token request to PayPal API")
+            val response = PaymentApiInstance.api.getAccessToken(authHeader)
 
-                if (response.isSuccessful) {
-                    val tokenResponse = response.body()
-                    if (tokenResponse != null) {
-                        Log.d(
-                            TAG,
-                            "Token fetched successfully: ${tokenResponse.access_token.take(5)}..."
-                        )
-                        _paymentState.update { 
-                            it.copy(
-                                isLoading = false, 
-                                accessToken = tokenResponse.access_token
-                            )
-                        }
-                    } else {
-                        Log.e(TAG, "Token response body is null")
-                        _paymentState.update {
-                            it.copy(
-                                isLoading = false,
-                                error = "Failed to get access token: Response body is null"
-                            )
+            Log.d(TAG, "Raw token response = ${response.raw()}")
+
+            return@withContext if (response.isSuccessful) {
+                val tokenResponse = try {
+                    response.body()
+                } catch (e: ClassCastException) {
+                    // Defensive fallback: parse JSON string if converter fails
+                    Log.w(TAG, "ClassCastException while parsing token body, trying manual parse", e)
+                    val raw = response.errorBody()?.string() ?: response.raw().toString()
+                    try {
+                        val jo = JSONObject(raw)
+                        val token = jo.optString("access_token", null)
+                        token?.let { object {
+                            val access_token = it
+                        } } // not used directly, we'll set manually below
+                    } catch (pe: Exception) {
+                        null
+                    }
+                }
+
+                // If body is parsed by converter:
+                val accessToken = tokenResponse?.let {
+                    // try reflection-like safe extraction (common field name)
+                    val field = try { tokenResponse::class.java.getDeclaredField("access_token") } catch (_: Exception) { null }
+                    field?.let {
+                        it.isAccessible = true
+                        it.get(tokenResponse) as? String
+                    } ?: run {
+                        // fallback: try property named accessToken
+                        try {
+                            val f = tokenResponse::class.java.getDeclaredField("accessToken")
+                            f.isAccessible = true
+                            f.get(tokenResponse) as? String
+                        } catch (_: Exception) {
+                            null
                         }
                     }
+                }
+
+                // final fallback: try reading JSON body direct (if converter failed)
+                val finalToken = accessToken ?: run {
+                    try {
+                        val rawBody = response.body()?.toString()
+                        // can't rely on body().toString(); try errorBody
+                        val err = response.errorBody()?.string()
+                        null
+                    } catch (_: Exception) { null }
+                }
+
+                // Prefer token from body when available; else try reading known response structure
+                val tokenToUse = accessToken ?: tokenResponse?.let {
+                    // If we failed to extract programmatically, try json parse of response.body() string
+                    null
+                }
+
+                // If still null, try a second attempt to read the response again as JSON (best-effort)
+                var finalTokenValue: String? = null
+                if (tokenToUse != null) finalTokenValue = tokenToUse
+                else {
+                    try {
+                        val rawText = response.body()?.let { it.toString() } ?: response.errorBody()?.string()
+                        if (!rawText.isNullOrBlank()) {
+                            val jo = JSONObject(rawText)
+                            finalTokenValue = jo.optString("access_token", null)
+                        }
+                    } catch (_: Exception) {
+                        finalTokenValue = null
+                    }
+                }
+
+                if (!finalTokenValue.isNullOrBlank()) {
+                    Log.d(TAG, "Token fetched successfully")
+                    _paymentState.update { it.copy(isLoading = false, accessToken = finalTokenValue) }
+                    true
                 } else {
-                    val errorResponse = response.errorBody()?.string() ?: "No error body"
-                    Log.e(
-                        TAG,
-                        "Failed to get access token: ${response.code()} ${response.message()} - $errorResponse"
-                    )
+                    Log.e(TAG, "Token response body is null or malformed")
                     _paymentState.update {
-                        it.copy(
-                            isLoading = false,
-                            error = "Failed to get access token: ${response.message()}"
-                        )
+                        it.copy(isLoading = false, error = "Failed to get access token: Response body is null or malformed")
                     }
+                    false
                 }
-            } catch (e: Exception) {
-                Log.e(TAG, "Error fetching access token", e)
+            } else {
+                val err = response.errorBody()?.string() ?: "No error body"
+                Log.e(TAG, "Failed to get access token: ${response.code()} ${response.message()} - $err")
                 _paymentState.update {
-                    it.copy(
-                        isLoading = false,
-                        error = "Error: ${e.message}"
-                    )
+                    it.copy(isLoading = false, error = "Failed to get access token: ${response.message()}")
                 }
+                false
             }
+        } catch (e: Exception) {
+            Log.e(TAG, "Error fetching access token", e)
+            _paymentState.update { it.copy(isLoading = false, error = "Error: ${e.message}") }
+            false
         }
     }
 
-    // Create a PayPal order with improved payload
-    fun createOrder(amount: String, onOrderCreated: (String) -> Unit = {}) {
-        Log.d(TAG, "Creating PayPal order for amount: $amount USD")
-        // Check if we have an access token first
-        if (_paymentState.value.accessToken == null) {
-            Log.e(TAG, "Cannot create order: No access token available")
-            _paymentState.update {
-                it.copy(error = "No access token available. Please try again.")
-            }
-            return
-        }
-
-        _paymentState.update { it.copy(isLoading = true, error = null) }
-        val uniqueRequestId = UUID.randomUUID().toString()
-        Log.d(TAG, "Generated unique request ID: $uniqueRequestId")
-
+    // Create a PayPal order. This will ensure a token exists first, then create order and extract approval link.
+    fun createOrder(amount: String, onApprovalUrlReady: (String) -> Unit = {}) {
         viewModelScope.launch {
+            Log.d(TAG, "Creating PayPal order for amount: $amount USD")
+
+            val tokenOk = ensureAccessToken()
+            if (!tokenOk) {
+                Log.e(TAG, "Cannot create order: Failed to obtain access token")
+                _paymentState.update { it.copy(error = "Failed to obtain access token") }
+                return@launch
+            }
+
+            _paymentState.update { it.copy(isLoading = true, error = null) }
+            val uniqueRequestId = UUID.randomUUID().toString()
+            Log.d(TAG, "Generated unique request ID: $uniqueRequestId")
+
             try {
-                // Create JSON payload for order creation with improved parameters
                 val jsonObject = JSONObject().apply {
                     put("intent", "CAPTURE")
                     put("purchase_units", JSONArray().apply {
@@ -151,13 +204,9 @@ class PaymentViewModel : ViewModel() {
                     })
                 }
 
-                Log.d(TAG, "Order payload prepared: ${jsonObject.toString().take(100)}...")
+                Log.d(TAG, "Order payload prepared: ${jsonObject.toString().take(120)}...")
 
-                // Bearer token format
                 val authHeader = "Bearer ${_paymentState.value.accessToken}"
-
-                // Use PaymentApiInstance to make the API call
-                Log.d(TAG, "Sending create order request to PayPal API")
                 val response = PaymentApiInstance.api.createOrder(
                     jsonObject.toString().toRequestBody("application/json".toMediaType()),
                     authHeader,
@@ -166,89 +215,104 @@ class PaymentViewModel : ViewModel() {
 
                 if (response.isSuccessful) {
                     val orderResponse = response.body()
-                    if (orderResponse != null) {
-                        val orderId = orderResponse.id
-                        Log.d(
-                            TAG,
-                            "Order created successfully: $orderId with status: ${orderResponse.status}"
-                        )
+                    // Defensive: try to extract order id and approval link
+                    var orderId: String? = null
+                    var approvalUrl: String? = null
 
-                        // Log links received from PayPal
-                        orderResponse.links.forEach { link ->
-                            Log.d(TAG, "Link: ${link.rel} - ${link.method} - ${link.href}")
+                    try {
+                        if (orderResponse != null) {
+                            orderId = orderResponse.id
+                            orderResponse.links.forEach { link ->
+                                if (link.rel.equals("approve", true) || link.rel.equals("payer-action", true)) {
+                                    approvalUrl = link.href
+                                }
+                            }
+                        } else {
+                            // If converter returned null (rare), parse raw response
+                            val raw = response.errorBody()?.string() ?: response.raw().toString()
+                            val jo = JSONObject(raw)
+                            orderId = jo.optString("id", null)
+                            val links = jo.optJSONArray("links")
+                            if (links != null) {
+                                for (i in 0 until links.length()) {
+                                    val l = links.getJSONObject(i)
+                                    val rel = l.optString("rel")
+                                    if (rel.equals("approve", true) || rel.equals("payer-action", true)) {
+                                        approvalUrl = l.optString("href", null)
+                                        break
+                                    }
+                                }
+                            }
                         }
+                    } catch (e: Exception) {
+                        Log.w(TAG, "Failed to extract order details via converter; trying manual parse", e)
+                        try {
+                            val raw = response.errorBody()?.string()
+                            if (!raw.isNullOrBlank()) {
+                                val jo = JSONObject(raw)
+                                orderId = jo.optString("id", null)
+                                val links = jo.optJSONArray("links")
+                                if (links != null) {
+                                    for (i in 0 until links.length()) {
+                                        val l = links.getJSONObject(i)
+                                        val rel = l.optString("rel")
+                                        if (rel.equals("approve", true) || rel.equals("payer-action", true)) {
+                                            approvalUrl = l.optString("href", null)
+                                            break
+                                        }
+                                    }
+                                }
+                            }
+                        } catch (_: Exception) { /* ignore */ }
+                    }
 
-                        _paymentState.update { 
-                            it.copy(
-                                isLoading = false, 
-                                orderId = orderId,
-                                requestId = uniqueRequestId
-                            ) 
-                        }
-                        
-                        onOrderCreated(orderId)
-                    } else {
-                        Log.e(TAG, "Response body is null")
+                    if (orderId != null) {
+                        Log.d(TAG, "Order created: $orderId (approvalUrl=${approvalUrl?.take(60)})")
                         _paymentState.update {
                             it.copy(
                                 isLoading = false,
-                                error = "Failed to create order: Response body is null"
+                                orderId = orderId,
+                                approvalUrl = approvalUrl,
+                                requestId = uniqueRequestId
                             )
                         }
+                        approvalUrl?.let { onApprovalUrlReady(it) } ?: onApprovalUrlReady("https://www.paypal.com/checkoutnow?token=$orderId")
+                    } else {
+                        Log.e(TAG, "Order created but failed to parse order id")
+                        val err = response.errorBody()?.string() ?: "No error body"
+                        _paymentState.update { it.copy(isLoading = false, error = "Failed to create order: parse error") }
                     }
                 } else {
-                    val errorResponse = response.errorBody()?.string() ?: "No error body"
-                    Log.e(
-                        TAG,
-                        "Failed to create order: ${response.code()} ${response.message()} - $errorResponse"
-                    )
-                    _paymentState.update {
-                        it.copy(
-                            isLoading = false,
-                            error = "Failed to create order: ${response.message()}"
-                        )
-                    }
+                    val err = response.errorBody()?.string() ?: "No error body"
+                    Log.e(TAG, "Failed to create order: ${response.code()} ${response.message()} - $err")
+                    _paymentState.update { it.copy(isLoading = false, error = "Failed to create order: ${response.message()}") }
                 }
             } catch (e: IOException) {
                 Log.e(TAG, "Network error creating order", e)
-                _paymentState.update {
-                    it.copy(
-                        isLoading = false,
-                        error = "Network error: ${e.message}"
-                    )
-                }
+                _paymentState.update { it.copy(isLoading = false, error = "Network error: ${e.message}") }
             } catch (e: Exception) {
                 Log.e(TAG, "Error processing order", e)
-                _paymentState.update {
-                    it.copy(
-                        isLoading = false,
-                        error = "Error: ${e.message}"
-                    )
-                }
+                _paymentState.update { it.copy(isLoading = false, error = "Error: ${e.message}") }
             }
         }
     }
 
     // Capture the payment after approval
     fun captureOrder(orderId: String) {
-        Log.d(TAG, "Attempting to capture payment for order: $orderId")
-        // Check if we have an access token
-        if (_paymentState.value.accessToken == null) {
-            Log.e(TAG, "Cannot capture payment: No access token available")
-            _paymentState.update {
-                it.copy(error = "No access token available. Please try again.")
-            }
-            return
-        }
-
-        _paymentState.update { it.copy(isLoading = true, error = null) }
-
         viewModelScope.launch {
-            try {
-                // Bearer token format
-                val authHeader = "Bearer ${_paymentState.value.accessToken}"
+            Log.d(TAG, "Attempting to capture payment for order: $orderId")
 
-                // Use PaymentApiInstance to make the API call
+            val tokenOk = ensureAccessToken()
+            if (!tokenOk) {
+                Log.e(TAG, "Cannot capture payment: no access token")
+                _paymentState.update { it.copy(error = "No access token available. Please try again.") }
+                return@launch
+            }
+
+            _paymentState.update { it.copy(isLoading = true, error = null) }
+
+            try {
+                val authHeader = "Bearer ${_paymentState.value.accessToken}"
                 Log.d(TAG, "Sending capture request to PayPal API")
                 val response = PaymentApiInstance.api.captureOrder(
                     orderId,
@@ -259,65 +323,24 @@ class PaymentViewModel : ViewModel() {
                 if (response.isSuccessful) {
                     val captureResponse = response.body()
                     if (captureResponse != null) {
-                        Log.d(
-                            TAG,
-                            "Payment captured successfully with status: ${captureResponse.status}"
-                        )
-                        Log.d(
-                            TAG,
-                            "Payer info: ${captureResponse.payer.name.given_name} ${captureResponse.payer.name.surname}, Email: ${captureResponse.payer.email_address}"
-                        )
-
-                        captureResponse.purchase_units.forEach { unit ->
-                            unit.payments.captures.forEach { capture ->
-                                Log.d(
-                                    TAG,
-                                    "Capture ID: ${capture.id}, Status: ${capture.status}, Amount: ${capture.amount.value} ${capture.amount.currency_code}"
-                                )
-                            }
-                        }
-
+                        Log.d(TAG, "Payment captured successfully with status: ${captureResponse.status}")
                         logTransactionDetails(captureResponse)
-
                         _paymentState.update { it.copy(isLoading = false, isSuccess = true) }
                     } else {
                         Log.e(TAG, "Capture response body is null")
-                        _paymentState.update {
-                            it.copy(
-                                isLoading = false,
-                                error = "Failed to capture payment: Response body is null"
-                            )
-                        }
+                        _paymentState.update { it.copy(isLoading = false, error = "Failed to capture payment: Response body is null") }
                     }
                 } else {
                     val errorResponse = response.errorBody()?.string() ?: "No error body"
-                    Log.e(
-                        TAG,
-                        "Failed to capture payment: ${response.code()} ${response.message()} - $errorResponse"
-                    )
-                    _paymentState.update {
-                        it.copy(
-                            isLoading = false,
-                            error = "Failed to capture payment: ${response.message()}"
-                        )
-                    }
+                    Log.e(TAG, "Failed to capture payment: ${response.code()} ${response.message()} - $errorResponse")
+                    _paymentState.update { it.copy(isLoading = false, error = "Failed to capture payment: ${response.message()}") }
                 }
             } catch (e: IOException) {
                 Log.e(TAG, "Network error capturing payment", e)
-                _paymentState.update {
-                    it.copy(
-                        isLoading = false,
-                        error = "Network error: ${e.message}"
-                    )
-                }
+                _paymentState.update { it.copy(isLoading = false, error = "Network error: ${e.message}") }
             } catch (e: Exception) {
                 Log.e(TAG, "Error processing capture", e)
-                _paymentState.update {
-                    it.copy(
-                        isLoading = false,
-                        error = "Error: ${e.message}"
-                    )
-                }
+                _paymentState.update { it.copy(isLoading = false, error = "Error: ${e.message}") }
             }
         }
     }
@@ -325,30 +348,19 @@ class PaymentViewModel : ViewModel() {
     // Handle payment failure
     fun handlePaymentFailure(errorMessage: String) {
         Log.e(TAG, "Payment failure: $errorMessage")
-        _paymentState.update {
-            it.copy(
-                isLoading = false,
-                error = errorMessage
-            )
-        }
+        _paymentState.update { it.copy(isLoading = false, error = errorMessage) }
     }
 
     // Handle payment cancellation
     fun handlePaymentCancellation() {
         Log.d(TAG, "Payment cancelled by user")
-        _paymentState.update {
-            it.copy(
-                isLoading = false,
-                orderId = null
-            )
-        }
+        _paymentState.update { it.copy(isLoading = false, orderId = null, approvalUrl = null) }
     }
 
-    // Handle intent from PayPal
+    // Handle intent from PayPal - pass the whole URI; viewModel handles token/PayerID or opType
     fun handlePayPalResult(opType: String?, uri: Uri? = null) {
-        Log.d(TAG, "Received PayPal callback with opType: $opType")
+        Log.d(TAG, "Received PayPal callback with opType: $opType, uri=$uri")
 
-        // Handle explicit operation types first
         when (opType) {
             "payment" -> {
                 _paymentState.value.orderId?.let { orderId ->
@@ -364,17 +376,11 @@ class PaymentViewModel : ViewModel() {
             }
         }
 
-        // If no explicit opType, check for PayPal standard redirect parameters
         if (uri != null) {
             val token = uri.getQueryParameter("token")
-            val payerId = uri.getQueryParameter("PayerID")
-
-            if (token != null && payerId != null) {
-                // This is a successful payment approval
-                Log.d(
-                    TAG,
-                    "Detected successful PayPal payment approval with token: $token and PayerID: $payerId"
-                )
+            val payerId = uri.getQueryParameter("PayerID") ?: uri.getQueryParameter("PayerId") // some variants
+            if (!token.isNullOrBlank()) {
+                Log.d(TAG, "Detected PayPal approval with token=$token, payerId=$payerId")
                 captureOrder(token)
                 return
             }
@@ -399,11 +405,9 @@ class PaymentViewModel : ViewModel() {
         sb.appendLine("Email: ${response.payer.email_address}")
         sb.appendLine("PayPal ID: ${response.payer.payer_id}")
         sb.appendLine("---")
-
         response.purchase_units.forEach { unit ->
             sb.appendLine("PURCHASE DETAILS:")
             sb.appendLine("Reference ID: ${unit.reference_id}")
-
             unit.payments.captures.forEach { capture ->
                 sb.appendLine("Capture ID: ${capture.id}")
                 sb.appendLine("Capture Status: ${capture.status}")
@@ -411,7 +415,6 @@ class PaymentViewModel : ViewModel() {
             }
         }
         sb.appendLine("=============================================================")
-
         Log.i(TAG, sb.toString())
     }
 }
