@@ -107,3 +107,12 @@
 ############################################################
 -keep class com.airbnb.lottie.** { *; }
 -dontwarn com.airbnb.lottie.**
+
+# Keep PayPal response model
+-keep class com.example.autocompose.domain.paymentResponseModels.TokenResponse { *; }
+
+# Keep Gson annotations
+-keep class com.google.gson.annotations.SerializedName { *; }
+
+# Keep all Gson classes
+-keep class com.google.gson.** { *; }
