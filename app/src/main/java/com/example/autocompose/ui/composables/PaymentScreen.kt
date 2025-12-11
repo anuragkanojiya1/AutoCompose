@@ -81,7 +81,7 @@ import kotlinx.coroutines.withContext
 fun PaymentScreen(
     navController: NavController,
     viewModel: PaymentViewModel,
-    amount: String = "5.00"
+    amount: String = "1.99"
 ) {
     val TAG = "PaymentScreen"
     Log.d(TAG, "Initializing PaymentScreen with amount: $$amount")
@@ -549,6 +549,6 @@ fun PaymentScreen(
 @Preview(showBackground = true)
 fun PaymentScreenPreview() {
     AutoComposeTheme {
-        PaymentScreen(rememberNavController(), viewModel = PaymentViewModel(), amount = "10.00")
+        PaymentScreen(rememberNavController(), viewModel = PaymentViewModel(), amount = "1.99")
     }
 }
