@@ -191,7 +191,7 @@ fun PaymentScreen(
                     horizontalAlignment = Alignment.CenterHorizontally
                 ) {
                     Text(
-                        text = "$9.99/month",
+                        text = "$1.99/month",
                         style = MaterialTheme.typography.headlineMedium,
                         fontWeight = FontWeight.Bold,
                         color = MaterialTheme.colorScheme.background
@@ -321,7 +321,7 @@ fun PaymentScreen(
                                 style = MaterialTheme.typography.bodyMedium
                             )
                             Text(
-                                text = "$9.99",
+                                text = "$1.99",
                                 style = MaterialTheme.typography.bodyMedium,
                                 fontWeight = FontWeight.Bold
                             )
@@ -417,7 +417,7 @@ fun PaymentScreen(
                         // Keep existing payment logic
                         if (termsAccepted) {
                             Log.d(TAG, "User clicked 'Pay with PayPal' button")
-                            viewModel.createOrder("9.99") { orderId ->
+                            viewModel.createOrder("1.99") { orderId ->
                                 Log.d(TAG, "Order created with ID: $orderId")
                             }
                         }

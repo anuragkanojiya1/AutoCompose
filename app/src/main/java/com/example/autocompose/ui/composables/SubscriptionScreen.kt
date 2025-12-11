@@ -163,7 +163,7 @@ fun SubscriptionScreen(navController: NavController, autoComposeViewmodel: AutoC
             // Premium Plan
             SubscriptionPlanCard(
                 planName = "Premium",
-                price = "$9.99",
+                price = "$1.99",
                 backgroundColor = MaterialTheme.colorScheme.background,
                 buttonText = if (subscriptionTier=="premium")
                 "Already Subscribed" else "Upgrade Now",
