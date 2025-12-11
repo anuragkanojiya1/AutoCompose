@@ -100,13 +100,13 @@
 -keep class com.airbnb.lottie.** { *; }
 -dontwarn com.airbnb.lottie.**
 
-# Keep Gson annotations
--keep class com.google.gson.annotations.SerializedName { *; }
-
-# Keep all Gson classes
--keep class com.google.gson.** { *; }
-
--keep class com.example.autocompose.data.** { *; }
--keep class com.example.autocompose.domain.** { *; }
--keep class com.example.autocompose.utils.** { *; }
+## Keep Gson annotations
+#-keep class com.google.gson.annotations.SerializedName { *; }
+#
+## Keep all Gson classes
+#-keep class com.google.gson.** { *; }
+#
+#-keep class com.example.autocompose.data.** { *; }
+#-keep class com.example.autocompose.domain.** { *; }
+#-keep class com.example.autocompose.utils.** { *; }
 
