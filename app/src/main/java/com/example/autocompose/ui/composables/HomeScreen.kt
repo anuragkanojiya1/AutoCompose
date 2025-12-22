@@ -42,6 +42,7 @@ import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -85,6 +86,11 @@ fun HomeScreen(
     val isSearchActive by frequentEmailViewModel.isSearchActive.collectAsState()
     var searchQuery by remember { mutableStateOf("") }
     var showSearchBar by remember { mutableStateOf(false) }
+
+    // 🔄 Run once when screen opens
+    LaunchedEffect(Unit) {
+        frequentEmailViewModel.syncEmails()
+    }
 
     val maxInitialEmails = 3
     val maxEmailsIncrement = 3
@@ -151,7 +157,8 @@ fun HomeScreen(
                                     unfocusedBorderColor = Color.Gray,
                                     focusedBorderColor = Color.DarkGray,
                                     focusedTextColor = MaterialTheme.colorScheme.onSurface,
-                                    containerColor = MaterialTheme.colorScheme.surfaceContainer                        ),
+                                    containerColor = MaterialTheme.colorScheme.surfaceContainer
+                                ),
                                 shape = RoundedCornerShape(16.dp),
 //                                colors = TextFieldDefaults.outlinedTextFieldColors(
 //                                    unfocusedTextColor = Color.Gray,
