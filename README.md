@@ -43,12 +43,14 @@ AutoCompose is an intelligent email agent built for speed, multilingual fluency,
 ---
 
 ## 📱Screenshots
-<img src="https://github.com/user-attachments/assets/f0558866-dbcf-4e2d-b7fc-87b63b895d0f" alt="Screenshot_20250421_144040" width="250"/>
-<img src="https://github.com/user-attachments/assets/a1263b49-0c22-427a-a953-41e1b9b0f12e" alt="Screenshot_20250408_183741" width="250"/>
-<img src="https://github.com/user-attachments/assets/446c877e-57b4-4f85-b40a-51c7b86fd7a7" alt="Screenshot_20250408_183942" width="250"/>
-<img src="https://github.com/user-attachments/assets/07af1e86-3961-4ce4-bec0-487748bb6de2" alt="Screenshot_20250408_183957" width="250"/>
-<img src="https://github.com/user-attachments/assets/230afb94-613f-4a06-936b-168bb106844a" alt="Screenshot_20250421_004851" width="250"/>
-<img src="https://github.com/user-attachments/assets/c62e6d44-60b9-4b7c-8328-85424b973531" alt="Screenshot_20250421_004903" width="250"/>
+
+<img src="https://github.com/user-attachments/assets/ceb4d201-0187-4eec-b7ab-6f518791b900" alt="Screenshot_20260104_000335" width="250"/>
+<img width="250" alt="Screenshot_20260104_002019" src="https://github.com/user-attachments/assets/39aed387-f5d4-48df-bc94-ad44a28733e5" />
+<img width="250" alt="Screenshot_20260104_002011" src="https://github.com/user-attachments/assets/ab5bdd1c-305c-4062-9086-ca7bd5238141" />
+<img width="250" alt="Screenshot_20260104_002133" src="https://github.com/user-attachments/assets/98c13c82-63cf-4713-8e3b-f3807c1c18da" />
+<img src="https://github.com/user-attachments/assets/6c53e71d-f04c-4e7f-83bc-0cf8633c916d" alt="Screenshot_20260104_000448" width="250"/>
+<img src="https://github.com/user-attachments/assets/caacec99-7ccd-4d1b-b3b7-cedcfa0d1724" alt="Screenshot_20260104_001027" width="250"/>
+<img width="250" alt="Screenshot_20260104_000502" src="https://github.com/user-attachments/assets/ebadaff9-bfe4-4b15-b58d-123d8ca6e59e" />
 
 ## 🗄️Backend info
 - [**Dev.to post**](https://dev.to/anuragkanojiya/how-to-use-langgraph-within-a-fastapi-backend-amm)
