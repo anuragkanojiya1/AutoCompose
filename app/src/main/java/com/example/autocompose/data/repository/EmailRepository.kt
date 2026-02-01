@@ -2,7 +2,9 @@ package com.example.autocompose.data.repository
 
 import com.example.autocompose.data.database.Dao
 import com.example.autocompose.data.database.EmailFirestoreDto
+import com.example.autocompose.data.database.EmailRoomDto
 import com.example.autocompose.data.database.Entity
+import com.google.firebase.Timestamp
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FieldValue
 import com.google.firebase.firestore.FirebaseFirestore
@@ -49,14 +51,19 @@ class EmailRepository(
                 SetOptions.merge()
             )
         } else {
-            dao.insertEmails(Entity(subject = subject, emailBody = body, frequency = 1))
+            dao.insertEmails(
+                Entity(
+                    subject = subject, emailBody = body, frequency = 1,
+//                    updatedAt = FieldValue.serverTimestamp()
+                )
+            )
 
             docRef.set(
                 EmailFirestoreDto(
                     subject = subject,
                     emailBody = body,
                     frequency = 1,
-                    updatedAt = System.currentTimeMillis()
+                    updatedAt = FieldValue.serverTimestamp()
                 )
             )
         }
@@ -87,13 +94,14 @@ class EmailRepository(
     suspend fun syncFromFirestoreToRoom() {
         val snapshot = userCollection().get().await()
         snapshot.documents.forEach {
-            val dto = it.toObject(EmailFirestoreDto::class.java) ?: return@forEach
+            val dto = it.toObject(EmailRoomDto::class.java) ?: return@forEach
             if (dao.findEmail(dto.subject, dto.emailBody) == null) {
                 dao.insertEmails(
                     Entity(
                         subject = dto.subject,
                         emailBody = dto.emailBody,
-                        frequency = dto.frequency
+                        frequency = dto.frequency,
+//                        updatedAt = dto.updatedAt
                     )
                 )
             }

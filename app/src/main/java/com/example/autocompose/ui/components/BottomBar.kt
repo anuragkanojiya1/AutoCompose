@@ -68,7 +68,7 @@ fun BottomBar(navController: NavController){
                         ) else Modifier
                     )
                     .size(64.dp),
-            ) {
+                ) {
                 Icon(Icons.Default.Home, contentDescription = "Home",
                     modifier = Modifier.size(32.dp)
                 )
