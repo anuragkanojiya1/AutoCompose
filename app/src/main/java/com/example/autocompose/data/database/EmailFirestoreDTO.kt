@@ -14,4 +14,5 @@ data class EmailRoomDto(
     val subject: String = "",
     val emailBody: String = "",
     val frequency: Int = 1,
+     val updatedAt: FieldValue = FieldValue.serverTimestamp()
 )
