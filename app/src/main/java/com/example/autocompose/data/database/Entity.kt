@@ -11,5 +11,5 @@ data class Entity(
     val subject : String,
     val emailBody: String,
     val frequency: Int = 1,
-//    val updatedAt: FieldValue = FieldValue.serverTimestamp()
+    val updatedAt: FieldValue = FieldValue.serverTimestamp()
 )
