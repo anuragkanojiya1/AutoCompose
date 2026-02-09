@@ -437,7 +437,7 @@ fun EmailItem(
                 horizontalArrangement = Arrangement.spacedBy(16.dp)
             ) {
                 Text(
-                    text = subject,
+                    text = subject.take(35) + if (subject.length > 35) "..." else "",
                     fontWeight = FontWeight.Medium,
                     fontSize = 14.sp,
                 )
