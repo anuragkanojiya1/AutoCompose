@@ -101,7 +101,6 @@ class EmailRepository(
                         subject = dto.subject,
                         emailBody = dto.emailBody,
                         frequency = dto.frequency,
-//                        updatedAt = dto.updatedAt
                     )
                 )
             }
