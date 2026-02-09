@@ -344,9 +344,7 @@ fun HomeScreen(
                                 "draft_agent_screen/${Uri.encode(email.subject)}/${Uri.encode(email.emailBody)}"
                             )
                         }
-
                     )
-
                     Divider(thickness = 1.dp, color = Color(0xFFEEEEEE))
                 }
             } else {
