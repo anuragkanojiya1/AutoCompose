@@ -10,13 +10,13 @@ import com.google.firebase.firestore.FieldValue
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.SetOptions
 import kotlinx.coroutines.tasks.await
+import javax.inject.Inject
 
-class EmailRepository(
-    private val dao: Dao
+class EmailRepository @Inject constructor(
+    private val dao: Dao,
+    private val firestore: FirebaseFirestore,
+    private val auth: FirebaseAuth
 ) {
-
-    private val firestore = FirebaseFirestore.getInstance()
-    private val auth = FirebaseAuth.getInstance()
 
     private fun uid(): String =
         auth.currentUser?.uid ?: throw IllegalStateException("User not logged in")

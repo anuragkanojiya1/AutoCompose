@@ -8,12 +8,17 @@ import com.example.autocompose.domain.model.UpdateSubscriptionRequest
 import com.example.autocompose.domain.responseModel.TopLanguage
 import com.example.autocompose.domain.responseModel.TopModel
 import com.example.autocompose.domain.responseModel.TopTone
+import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.launch
+import javax.inject.Inject
 
-class AutoComposeViewmodel : ViewModel() {
+@HiltViewModel
+class AutoComposeViewmodel @Inject constructor(
+    private val repository: Repository
+) : ViewModel() {
 
-    private val repository = Repository()
+//    private val repository = Repository()
 
     private val _subject = MutableStateFlow<String>("")
     val subject: MutableStateFlow<String> = _subject

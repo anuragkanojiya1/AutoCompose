@@ -80,17 +80,21 @@ import androidx.compose.material.icons.filled.Remove
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
+import com.example.autocompose.data.api.Api
+import com.example.autocompose.data.api.PaymentAPI
 import com.example.autocompose.data.datastore.PreferencesManager
+import com.example.autocompose.data.repository.Repository
 import com.example.autocompose.ui.navigation.Screen
 import com.google.firebase.auth.FirebaseAuth
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun AgentScreen(
-    autoComposeViewmodel: AutoComposeViewmodel,
-    frequentEmailViewModel: FrequentEmailViewModel,
+    autoComposeViewmodel: AutoComposeViewmodel = hiltViewModel(),
+    frequentEmailViewModel: FrequentEmailViewModel = hiltViewModel(),
     navController: NavController
 ) {
     val primaryBlue = Color(0xFF2196F3)
@@ -788,14 +792,14 @@ fun ModelRadioButton(text: String, selectedOption: String, onOptionSelected: (St
     }
 }
 
-@Preview(showBackground = true)
-@Composable
-fun AgentScreenPreview() {
-    AutoComposeTheme {
-        AgentScreen(
-            autoComposeViewmodel = AutoComposeViewmodel(),
-            frequentEmailViewModel = FrequentEmailViewModel(Application()),
-            navController = rememberNavController()
-        )
-    }
-}
+//@Preview(showBackground = true)
+//@Composable
+//fun AgentScreenPreview() {
+//    AutoComposeTheme {
+//        AgentScreen(
+//            autoComposeViewmodel = AutoComposeViewmodel(Repository),
+//            frequentEmailViewModel = FrequentEmailViewModel(Application()),
+//            navController = rememberNavController()
+//        )
+//    }
+//}

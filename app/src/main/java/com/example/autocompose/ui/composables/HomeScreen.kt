@@ -65,6 +65,7 @@ import com.airbnb.lottie.compose.rememberLottieComposition
 import com.example.autocompose.ui.viewmodel.FrequentEmailViewModel
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontFamily
+import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
 import com.example.autocompose.R
@@ -75,8 +76,8 @@ import com.example.autocompose.ui.navigation.Screen
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun HomeScreen(
-    frequentEmailViewModel: FrequentEmailViewModel,
-    application: Application,
+    frequentEmailViewModel: FrequentEmailViewModel = hiltViewModel(),
+//    application: Application,
     navController: NavController
 ) {
     val primaryBlue = Color(0xFF2196F3)
@@ -458,15 +459,15 @@ fun EmailItem(
     }
 }
 
-@Preview(showBackground = true)
-@Composable
-fun PreviewHomeScreen() {
-    HomeScreen(
-        frequentEmailViewModel = FrequentEmailViewModel(Application()),
-        application = Application(),
-        navController = rememberNavController()
-    )
-}
+//@Preview(showBackground = true)
+//@Composable
+//fun PreviewHomeScreen() {
+//    HomeScreen(
+//        frequentEmailViewModel = FrequentEmailViewModel(),
+//        application = Application(),
+//        navController = rememberNavController()
+//    )
+//}
 
 @Composable
 fun Animation(modifier: Modifier = Modifier) {

@@ -1,7 +1,7 @@
 package com.example.autocompose.data.repository
 
-import com.example.autocompose.data.api.ApiInstance
-import com.example.autocompose.data.api.PaymentApiInstance
+import com.example.autocompose.data.api.Api
+import com.example.autocompose.data.api.PaymentAPI
 import com.example.autocompose.domain.responseModel.AnalyticsResponse
 import com.example.autocompose.domain.responseModel.BackendResponse
 import com.example.autocompose.domain.model.Model
@@ -10,12 +10,16 @@ import com.example.autocompose.domain.responseModel.SubscriptionResponse
 import com.example.autocompose.domain.responseModel.UpdateSubscriptionResponse
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
+import javax.inject.Inject
 
-class Repository {
+class Repository @Inject constructor(
+    private val api : Api,
+    private val paymentApi : PaymentAPI
+) {
     
-    private val api = ApiInstance.api
-    private val paymentApi = PaymentApiInstance.api
-    
+//    api = ApiInstance.api
+//    paymentApi = PaymentApiInstance.api
+
     suspend fun generateEmail(
         tone: String,
         aiModel: String,

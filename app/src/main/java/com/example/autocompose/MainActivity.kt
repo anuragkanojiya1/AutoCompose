@@ -12,6 +12,7 @@ import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
+import androidx.activity.viewModels
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.credentials.ClearCredentialStateRequest
@@ -33,27 +34,39 @@ import com.google.firebase.FirebaseApp
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.GoogleAuthProvider
 import com.google.firebase.auth.auth
+import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.launch
 import java.util.Locale
+import javax.inject.Inject
 
+@AndroidEntryPoint
 class MainActivity : ComponentActivity() {
     var speechInput = mutableStateOf("")
-//    val auth: FirebaseAuth = FirebaseAuth.getInstance()
-    private lateinit var paymentViewModel: PaymentViewModel
-    private lateinit var auth: FirebaseAuth
+    val auth: FirebaseAuth = FirebaseAuth.getInstance()
+    private val paymentViewModel: PaymentViewModel by viewModels()
+    private val autoComposeViewModel: AutoComposeViewmodel by viewModels()
+    private val frequentEmailViewModel: FrequentEmailViewModel by viewModels()
+    @Inject lateinit var firebaseAuth: FirebaseAuth
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
-        FirebaseApp.initializeApp(this)
 
-        paymentViewModel = PaymentViewModel()
-        auth = Firebase.auth
+        FirebaseAuth.getInstance().addAuthStateListener { auth ->
+            val user = auth.currentUser
+            if (user != null) {
+                Log.d("AUTH_STATE", "User logged in: ${user.email}")
+            } else {
+                Log.d("AUTH_STATE", "User logged out")
+            }
+        }
+
+//        FirebaseApp.initializeApp(this)
+
+//        auth = Firebase.auth
         Log.d("MainActivity", "Initialized shared PaymentViewModel")
 
         setContent {
-            val autoComposeViewModel = AutoComposeViewmodel()
-            val frequentEmailViewModel = FrequentEmailViewModel(application)
             Log.d("MainActivity", "Initializing ViewModels")
 
             AutoComposeTheme {
@@ -66,12 +79,14 @@ class MainActivity : ComponentActivity() {
 
                 NavGraph(
                     navController = navController,
-                    frequentEmailViewModel = frequentEmailViewModel,
-                    autoComposeViewmodel = autoComposeViewModel,
-                    paymentViewModel = paymentViewModel,
-                    application = application,
+//                    frequentEmailViewModel = frequentEmailViewModel,
+//                    autoComposeViewmodel = autoComposeViewModel,
+//                    paymentViewModel = paymentViewModel,
+//                    application = application,
+                    firebaseAuth = firebaseAuth
                 )
             }
+
         }
     }
 
@@ -111,7 +126,7 @@ class MainActivity : ComponentActivity() {
     override fun onStart() {
         super.onStart()
         // Check if user is signed in (non-null) and update UI accordingly.
-        val currentUser = auth.currentUser
+        val currentUser = firebaseAuth.currentUser
 //        updateUI(currentUser)
     }
 

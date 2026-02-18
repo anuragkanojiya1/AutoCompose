@@ -51,6 +51,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
 import com.example.autocompose.data.datastore.PreferencesManager
@@ -60,7 +61,9 @@ import com.example.autocompose.ui.viewmodel.AutoComposeViewmodel
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun SubscriptionScreen(navController: NavController, autoComposeViewmodel: AutoComposeViewmodel) {
+fun SubscriptionScreen(navController: NavController,
+                       autoComposeViewmodel: AutoComposeViewmodel = hiltViewModel()
+) {
     val scrollState = rememberScrollState()
 
     val context = LocalContext.current
@@ -347,10 +350,10 @@ fun SubscriptionPlanCard(
     }
 }
 
-@Preview(showBackground = true)
-@Composable
-fun SubscriptionScreenPreview() {
-    AutoComposeTheme {
-        SubscriptionScreen(rememberNavController(), AutoComposeViewmodel())
-    }
-}
+//@Preview(showBackground = true)
+//@Composable
+//fun SubscriptionScreenPreview() {
+//    AutoComposeTheme {
+//        SubscriptionScreen(rememberNavController(), AutoComposeViewmodel())
+//    }
+//}

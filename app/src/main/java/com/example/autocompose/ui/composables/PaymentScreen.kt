@@ -65,6 +65,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
+import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import com.example.autocompose.data.datastore.PreferencesManager
 import com.example.autocompose.domain.model.UpdateSubscriptionRequest
 import com.example.autocompose.ui.theme.AutoComposeTheme
@@ -80,7 +81,8 @@ import kotlinx.coroutines.withContext
 @Composable
 fun PaymentScreen(
     navController: NavController,
-    viewModel: PaymentViewModel,
+    autoComposeViewmodel: AutoComposeViewmodel = hiltViewModel(),
+    paymentViewModel: PaymentViewModel = hiltViewModel(),
     amount: String = "1.99"
 ) {
     val TAG = "PaymentScreen"
@@ -91,7 +93,7 @@ fun PaymentScreen(
     val context = LocalContext.current
     val activity = context as Activity
     
-    val paymentState by viewModel.paymentState.collectAsState()
+    val paymentState by paymentViewModel.paymentState.collectAsState()
     var termsAccepted by remember { mutableStateOf(false) }
 
     val preferencesManager = PreferencesManager(context)
@@ -114,13 +116,13 @@ fun PaymentScreen(
     LaunchedEffect(Unit) {
         if (paymentState.accessToken == null) {
             Log.d(TAG, "No access token found, fetching from PayPal")
-            viewModel.fetchAccessToken()
+            paymentViewModel.fetchAccessToken()
         } else {
             Log.d(TAG, "Using existing access token")
         }
     }
 
-    val autoComposeViewmodel = AutoComposeViewmodel()
+//    val autoComposeViewmodel = AutoComposeViewmodel()
 
 //    LaunchedEffect(paymentState.isSuccess) {
 //        if (paymentState.isSuccess){
@@ -136,7 +138,7 @@ fun PaymentScreen(
                 // Extract opType from the URL if available
                 val opType = data.getQueryParameter("opType")
                 Log.d(TAG, "Received PayPal redirect with URI: ${data}, opType: $opType")
-                viewModel.handlePayPalResult(opType, data)
+                paymentViewModel.handlePayPalResult(opType, data)
             }
         }
     }
@@ -417,7 +419,7 @@ fun PaymentScreen(
                         // Keep existing payment logic
                         if (termsAccepted) {
                             Log.d(TAG, "User clicked 'Pay with PayPal' button")
-                            viewModel.createOrder("1.99") { orderId ->
+                            paymentViewModel.createOrder("1.99") { orderId ->
                                 Log.d(TAG, "Order created with ID: $orderId")
                             }
                         }
@@ -463,7 +465,7 @@ fun PaymentScreen(
                     Button(
                         onClick = {
                             Log.d(TAG, "User clicked 'Try Again' button")
-                            viewModel.resetState()
+                            paymentViewModel.resetState()
                         },
                         modifier = Modifier
                             .fillMaxWidth()
@@ -545,10 +547,10 @@ fun PaymentScreen(
     }
 }
 
-@Composable
-@Preview(showBackground = true)
-fun PaymentScreenPreview() {
-    AutoComposeTheme {
-        PaymentScreen(rememberNavController(), viewModel = PaymentViewModel(), amount = "1.99")
-    }
-}
+//@Composable
+//@Preview(showBackground = true)
+//fun PaymentScreenPreview() {
+//    AutoComposeTheme {
+//        PaymentScreen(rememberNavController(), viewModel = PaymentViewModel(), amount = "1.99")
+//    }
+//}

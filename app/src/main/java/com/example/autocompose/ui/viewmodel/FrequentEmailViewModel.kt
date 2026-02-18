@@ -3,20 +3,26 @@ package com.example.autocompose.ui.viewmodel
 import android.app.Application
 import android.util.Log
 import androidx.lifecycle.AndroidViewModel
+import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.autocompose.data.database.AppDatabase
 import com.example.autocompose.data.database.Entity
 import com.example.autocompose.data.repository.EmailRepository
+import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.firestore.FirebaseFirestore
+import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
+import javax.inject.Inject
 
-class FrequentEmailViewModel(application: Application) : AndroidViewModel(application) {
+@HiltViewModel
+class FrequentEmailViewModel @Inject constructor(
+    private val repository: EmailRepository
+) : ViewModel() {
 
     private val TAG = "FrequentEmailViewModel"
-    private val repository =
-        EmailRepository(AppDatabase.getDataBase(application).entityDao())
 
     private val _frequentEmails = MutableStateFlow<List<Entity>>(emptyList())
     val frequentEmails = _frequentEmails.asStateFlow()

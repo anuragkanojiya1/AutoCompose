@@ -1,19 +1,30 @@
 package com.example.autocompose.data.api
 
 import android.util.Log
+import com.example.autocompose.di.PayPalOkHttp
+import com.example.autocompose.di.PayPalRetrofit
+import dagger.Module
+import dagger.Provides
+import dagger.hilt.InstallIn
+import dagger.hilt.components.SingletonComponent
 import okhttp3.Interceptor
 import okhttp3.OkHttpClient
-import okhttp3.Response
 import okhttp3.logging.HttpLoggingInterceptor
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
 import java.util.concurrent.TimeUnit
+import javax.inject.Singleton
 
-object PaymentApiInstance {
+@Module
+@InstallIn(SingletonComponent::class)
+object PaymentNetworkModule {
 
     private val TAG = "PaymentAPI"
 
-    private fun apiInstance(isSandbox: Boolean = false): Retrofit {
+    @Provides
+    @Singleton
+    @PayPalOkHttp
+    fun providePayPalOkHttpClient(): OkHttpClient {
         val loggingInterceptor = HttpLoggingInterceptor { message ->
             Log.d(TAG, message)
         }.apply {
@@ -35,29 +46,40 @@ object PaymentApiInstance {
                 throw e
             }
         }
-
-        val okHttpClient = OkHttpClient.Builder()
+        return OkHttpClient.Builder()
             .connectTimeout(30, TimeUnit.SECONDS)
             .readTimeout(30, TimeUnit.SECONDS)
             .writeTimeout(30, TimeUnit.SECONDS)
             .addInterceptor(customInterceptor)
             .addInterceptor(loggingInterceptor)
             .build()
+    }
+    @Provides
+    @Singleton
+    @PayPalRetrofit
+    fun providePayPalRetrofit(
+       @PayPalOkHttp client: OkHttpClient
+    ): Retrofit {
 
-        val baseUrl = if (isSandbox) {
-            "https://api-m.sandbox.paypal.com/"
-        } else {
+        val baseUrl =
+//            if (BuildConfig.DEBUG) {
+//            "https://api-m.sandbox.paypal.com/"
+//        } else {
             "https://api-m.paypal.com/"
-        }
-
-        Log.d(TAG, "Initializing PayPal API client with baseUrl: $baseUrl")
+//        }
 
         return Retrofit.Builder()
             .baseUrl(baseUrl)
-            .client(okHttpClient)
+            .client(client)
             .addConverterFactory(GsonConverterFactory.create())
             .build()
     }
 
-    val api: PaymentAPI = apiInstance().create(PaymentAPI::class.java)
+    @Provides
+    @Singleton
+    fun providePaymentApi(
+       @PayPalRetrofit retrofit: Retrofit
+    ): PaymentAPI {
+        return retrofit.create(PaymentAPI::class.java)
+    }
 }

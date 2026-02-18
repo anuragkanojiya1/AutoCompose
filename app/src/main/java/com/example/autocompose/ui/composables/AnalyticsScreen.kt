@@ -29,6 +29,7 @@ import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
+import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
 import com.example.autocompose.data.datastore.PreferencesManager
@@ -37,7 +38,8 @@ import java.util.Locale
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun AnalyticsScreen(autoComposeViewmodel: AutoComposeViewmodel, navController: NavController) {
+fun AnalyticsScreen(autoComposeViewmodel: AutoComposeViewmodel = hiltViewModel(),
+                    navController: NavController) {
     val scrollState = rememberScrollState()
 
     val popularModels = autoComposeViewmodel.topModels.collectAsState()
@@ -187,7 +189,7 @@ fun AnalyticsScreen(autoComposeViewmodel: AutoComposeViewmodel, navController: N
                     val models = popularModels.value
                     val totalCount = models.sumOf { it.count }.toFloat()
 
-                    if (models.size >= 1) {
+                    if (models.size >= 2) {
                         val firstModel = models[0]
                         val secondModel = models[1]
 
@@ -899,8 +901,8 @@ fun getToneColor(tone: String): Color {
     }
 }
 
-@Preview(showBackground = true)
-@Composable
-fun AnalyticsScreenPreview() {
-    AnalyticsScreen(autoComposeViewmodel = AutoComposeViewmodel(), rememberNavController())
-}
+//@Preview(showBackground = true)
+//@Composable
+//fun AnalyticsScreenPreview() {
+//    AnalyticsScreen(autoComposeViewmodel = AutoComposeViewmodel(), rememberNavController())
+//}

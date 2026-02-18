@@ -4,9 +4,10 @@ import android.net.Uri
 import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.example.autocompose.data.api.PaymentApiInstance
+import com.example.autocompose.data.api.PaymentAPI
 import com.example.autocompose.domain.paymentResponseModels.PayPalCaptureResponse
 import com.example.autocompose.utils.Constants
+import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -20,6 +21,7 @@ import org.json.JSONArray
 import org.json.JSONObject
 import java.io.IOException
 import java.util.UUID
+import javax.inject.Inject
 
 data class PaymentState(
     val isLoading: Boolean = false,
@@ -31,7 +33,10 @@ data class PaymentState(
     val requestId: String? = null,
 )
 
-class PaymentViewModel : ViewModel() {
+@HiltViewModel
+class PaymentViewModel @Inject constructor(
+    private val paymentApi: PaymentAPI
+) : ViewModel() {
 
     private val clientId = Constants.PUBLISHABLE_KEY
     private val secretKey = Constants.SECRET_KEY
@@ -62,7 +67,7 @@ class PaymentViewModel : ViewModel() {
             )
 
             Log.d(TAG, "Making token request to PayPal API")
-            val response = PaymentApiInstance.api.getAccessToken(authHeader)
+            val response = paymentApi.getAccessToken(authHeader)
 
             Log.d(TAG, "Raw token response = ${response.raw()}")
 
@@ -207,7 +212,7 @@ class PaymentViewModel : ViewModel() {
                 Log.d(TAG, "Order payload prepared: ${jsonObject.toString().take(120)}...")
 
                 val authHeader = "Bearer ${_paymentState.value.accessToken}"
-                val response = PaymentApiInstance.api.createOrder(
+                val response = paymentApi.createOrder(
                     jsonObject.toString().toRequestBody("application/json".toMediaType()),
                     authHeader,
                     uniqueRequestId
@@ -314,7 +319,7 @@ class PaymentViewModel : ViewModel() {
             try {
                 val authHeader = "Bearer ${_paymentState.value.accessToken}"
                 Log.d(TAG, "Sending capture request to PayPal API")
-                val response = PaymentApiInstance.api.captureOrder(
+                val response = paymentApi.captureOrder(
                     orderId,
                     "".toRequestBody("application/json".toMediaType()),
                     authHeader

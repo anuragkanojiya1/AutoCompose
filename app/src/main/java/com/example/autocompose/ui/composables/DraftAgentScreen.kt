@@ -81,6 +81,7 @@ import androidx.compose.material3.IconButtonColors
 import androidx.compose.material3.IconButtonDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
 import com.example.autocompose.data.datastore.PreferencesManager
@@ -90,8 +91,8 @@ import kotlinx.coroutines.launch
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun DraftAgentScreen(
-    autoComposeViewmodel: AutoComposeViewmodel,
-    frequentEmailViewModel: FrequentEmailViewModel,
+    autoComposeViewmodel: AutoComposeViewmodel = hiltViewModel(),
+    frequentEmailViewModel: FrequentEmailViewModel = hiltViewModel(),
     navController: NavController,
     passSubject: String,
     passEmailContent: String
@@ -637,16 +638,16 @@ fun DraftAgentScreen(
     }
 }
 
-@Preview(showBackground = true)
-@Composable
-fun DraftAgentScreenPreview() {
-    AutoComposeTheme {
-        DraftAgentScreen(
-            autoComposeViewmodel = AutoComposeViewmodel(),
-            frequentEmailViewModel = FrequentEmailViewModel(Application()),
-            navController = rememberNavController(),
-            "",
-            ""
-        )
-    }
-}
+//@Preview(showBackground = true)
+//@Composable
+//fun DraftAgentScreenPreview() {
+//    AutoComposeTheme {
+//        DraftAgentScreen(
+//            autoComposeViewmodel = AutoComposeViewmodel(),
+//            frequentEmailViewModel = FrequentEmailViewModel(Application()),
+//            navController = rememberNavController(),
+//            "",
+//            ""
+//        )
+//    }
+//}

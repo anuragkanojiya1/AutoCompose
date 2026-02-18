@@ -1,5 +1,6 @@
 package com.example.autocompose.auth
 
+import android.util.Log
 import android.widget.Toast
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
@@ -25,6 +26,7 @@ import androidx.compose.material.icons.filled.Visibility
 import androidx.compose.material.icons.filled.VisibilityOff
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Divider
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
@@ -59,6 +61,10 @@ import com.example.autocompose.R
 import com.example.autocompose.ui.navigation.Screen
 import com.example.autocompose.ui.theme.AutoComposeTheme
 import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.auth.FirebaseAuthException
+import com.google.firebase.auth.FirebaseAuthInvalidCredentialsException
+import com.google.firebase.auth.FirebaseAuthUserCollisionException
+import com.google.firebase.auth.FirebaseAuthWeakPasswordException
 import com.google.firebase.auth.ktx.auth
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -73,21 +79,30 @@ fun SignUpScreen(navController: NavController, auth: FirebaseAuth) {
     var errorMessage by remember { mutableStateOf<String?>(null) }
     var passwordVisible by remember { mutableStateOf(false) }
     var confirmPasswordVisible by remember { mutableStateOf(false) }
+    var isLoading by remember { mutableStateOf(false) }
 
     val primaryBlue = Color(0xFF2196F3)
 
     val context = LocalContext.current
     val scope = rememberCoroutineScope()
-    val launcher = rememberLauncherForActivityResult(contract = ActivityResultContracts.StartActivityForResult()) {
-        GoogleSignInUtils.doGoogleSignIn(
-            context = context,
-            scope = scope,
-            launcher = null,
-            login = {
+
+    val launcher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.StartActivityForResult()
+    ) {
+        scope.launch {
+            val result = GoogleSignInUtils.signIn(context)
+
+            result.onSuccess {
                 Toast.makeText(context, "Login successful", Toast.LENGTH_SHORT).show()
+                navController.navigate(Screen.Home.route) {
+                    popUpTo(Screen.LogIn.route) { inclusive = true }
+                }
+            }.onFailure {
+                Toast.makeText(context, "Google Sign-In failed", Toast.LENGTH_SHORT).show()
             }
-        )
+        }
     }
+
     Box(
         modifier = Modifier
             .fillMaxSize()
@@ -221,20 +236,76 @@ fun SignUpScreen(navController: NavController, auth: FirebaseAuth) {
 
             // Sign Up Button
             Button(
+
                 onClick = {
-                    if (password == confirmPassword) {
-                        auth.createUserWithEmailAndPassword(email, password)
-                            .addOnCompleteListener { task ->
-                                if (task.isSuccessful) {
-                                    navController.navigate(Screen.Home.route) {
-                                        popUpTo(Screen.SignUp.route) { inclusive = true }
+                    if (isLoading) return@Button
+
+                    errorMessage = null
+                    Log.d("AUTH_SIGNUP", "Sign up clicked")
+
+                    val cleanEmail = email.trim()
+                    val cleanPassword = password.trim()
+
+                    when {
+                        cleanEmail.isBlank() || cleanPassword.isBlank() -> {
+                            errorMessage = "Email and password cannot be empty"
+                            Log.w("AUTH_SIGNUP", "Empty email or password")
+                        }
+
+                        cleanPassword.length < 6 -> {
+                            errorMessage = "Password must be at least 6 characters"
+                            Log.w("AUTH_SIGNUP", "Weak password")
+                        }
+
+                        cleanPassword != confirmPassword -> {
+                            errorMessage = "Passwords do not match"
+                            Log.w("AUTH_SIGNUP", "Passwords mismatch")
+                        }
+
+                        else -> {
+
+                            isLoading = true
+
+                            Log.d("AUTH_SIGNUP", "Attempting Firebase createUser")
+
+                            auth.createUserWithEmailAndPassword(cleanEmail, cleanPassword)
+                                .addOnCompleteListener { task ->
+
+                                    isLoading = false
+
+                                    if (task.isSuccessful) {
+                                        val user = auth.currentUser
+                                        Log.d("AUTH_SIGNUP", "User created successfully: ${user?.uid}")
+
+                                        navController.navigate(Screen.Home.route) {
+                                            popUpTo(Screen.SignUp.route) { inclusive = true }
+                                        }
+
+                                    } else {
+
+                                        val exception = task.exception
+                                        Log.e("AUTH_SIGNUP", "Sign up failed", exception)
+
+                                        errorMessage = when (exception) {
+
+                                            is FirebaseAuthWeakPasswordException ->
+                                                "Weak password. Minimum 6 characters required."
+
+                                            is FirebaseAuthUserCollisionException ->
+                                                "Email already registered."
+
+                                            is FirebaseAuthInvalidCredentialsException ->
+                                                "Invalid email format."
+
+                                            is FirebaseAuthException ->
+                                                exception.localizedMessage ?: "Authentication failed."
+
+                                            else ->
+                                                "Unknown error occurred."
+                                        }
                                     }
-                                } else {
-                                    errorMessage = task.exception?.message
                                 }
-                            }
-                    } else {
-                        errorMessage = "Passwords do not match"
+                        }
                     }
                 },
                 modifier = Modifier
@@ -244,9 +315,18 @@ fun SignUpScreen(navController: NavController, auth: FirebaseAuth) {
                 shape = RoundedCornerShape(12.dp),
                 colors = ButtonDefaults.buttonColors(
                     containerColor = primaryBlue
-                )
+                ),
+                enabled = !isLoading
             ) {
-                Text(text = "Sign Up", fontSize = 16.sp)
+                if (isLoading) {
+                    CircularProgressIndicator(
+                        modifier = Modifier.size(20.dp),
+                        strokeWidth = 2.dp,
+                        color = MaterialTheme.colorScheme.primary
+                    )
+                } else {
+                    Text(text = "Sign Up", fontSize = 16.sp)
+                }
             }
 
             // Divider with text

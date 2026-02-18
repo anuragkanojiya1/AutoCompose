@@ -3,6 +3,7 @@ package com.example.autocompose.ui.composables
 import android.content.Intent
 import android.net.Uri
 import android.util.Log
+import android.widget.Toast
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -76,6 +77,8 @@ import com.example.autocompose.ui.theme.AutoComposeTheme
 import com.google.firebase.auth.FirebaseAuth
 import kotlinx.coroutines.launch
 import androidx.core.net.toUri
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -413,8 +416,17 @@ fun SettingsScreen(navController: NavController) {
 
             Button(
                 onClick = {
-                    GoogleSignInUtils.signOut(context)
-                    navController.navigate(Screen.LogIn.route)
+                    coroutineScope.launch {
+                        val result = GoogleSignInUtils.signOut(context)
+
+                        result.onSuccess {
+                            navController.navigate(Screen.LogIn.route) {
+                                popUpTo(Screen.Home.route) { inclusive = true }
+                            }
+                        }.onFailure {
+                            Toast.makeText(context, "Sign-out failed", Toast.LENGTH_SHORT).show()
+                        }
+                    }
                 },
                 modifier = Modifier
                     .fillMaxWidth()

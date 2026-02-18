@@ -10,20 +10,18 @@ abstract class AppDatabase : RoomDatabase() {
 
     abstract fun entityDao(): Dao
 
-    companion object{
-        @Volatile
-        private var INSTANCE: AppDatabase? = null
-
-        fun getDataBase(context: Context): AppDatabase {
-            return INSTANCE ?: synchronized(this) {
-                val instance = Room.databaseBuilder(
-                    context.applicationContext,
-                    AppDatabase::class.java,
-                    "app_database"
-                ).build()
-                INSTANCE = instance
-                instance
-            }
-        }
-    }
+//        @Volatile
+//        private var INSTANCE: AppDatabase? = null
+//
+//        fun getDataBase(context: Context): AppDatabase {
+//            return INSTANCE ?: synchronized(this) {
+//                val instance = Room.databaseBuilder(
+//                    context.applicationContext,
+//                    AppDatabase::class.java,
+//                    "app_database"
+//                ).build()
+//                INSTANCE = instance
+//                instance
+//            }
+//        }
 }

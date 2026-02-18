@@ -5,6 +5,7 @@ plugins {
     id("com.google.devtools.ksp")
     alias(libs.plugins.google.gms.google.services)
     alias(libs.plugins.google.firebase.crashlytics)
+    id("com.google.dagger.hilt.android")
 
 }
 
@@ -87,8 +88,9 @@ dependencies {
     implementation(libs.retrofit)
     implementation(libs.converter.gson)
 
+    implementation(libs.logging.interceptor)
+
     val room_version = "2.5.0"
-    implementation("com.squareup.okhttp3:logging-interceptor:4.11.0")
 
     implementation("androidx.room:room-runtime:$room_version")
     ksp("androidx.room:room-compiler:$room_version")
@@ -99,16 +101,21 @@ dependencies {
     implementation("com.airbnb.android:lottie-compose:6.6.4")
 
     implementation("androidx.lifecycle:lifecycle-viewmodel-compose:2.8.7")
+
     val nav_version = "2.8.9"
-    implementation("androidx.navigation:navigation-compose:$nav_version")
+    implementation(libs.androidx.navigation.compose)
 
-    implementation("com.paypal.android:paypal-web-payments:2.0.0")
+    implementation(libs.paypal.web.payments)
 
-    implementation("com.google.code.gson:gson:2.13.1")
+    implementation(libs.gson)
 
-    implementation("androidx.datastore:datastore-preferences:1.1.6")
+    implementation(libs.androidx.datastore.preferences)
 
-    implementation("io.coil-kt.coil3:coil-compose:3.2.0")
-    implementation("io.coil-kt.coil3:coil-network-okhttp:3.2.0")
+    implementation(libs.coil.compose)
+    implementation(libs.coil.network.okhttp)
 
+    implementation(libs.hilt.android)
+    ksp(libs.dagger.hilt.android.compiler)
+
+    implementation(libs.androidx.hilt.lifecycle.viewmodel.compose)
 }

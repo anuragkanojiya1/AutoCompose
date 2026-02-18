@@ -1,7 +1,11 @@
 package com.example.autocompose.auth
 
+import android.content.Intent
+import android.util.Log
 import android.widget.Toast
+import androidx.activity.compose.ManagedActivityResultLauncher
 import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.ActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
@@ -13,6 +17,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Email
@@ -21,6 +26,7 @@ import androidx.compose.material.icons.filled.Visibility
 import androidx.compose.material.icons.filled.VisibilityOff
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Divider
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
@@ -55,6 +61,8 @@ import com.example.autocompose.ui.navigation.Screen
 import com.example.autocompose.ui.theme.AutoComposeTheme
 import com.google.android.gms.common.api.GoogleApi
 import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.auth.FirebaseAuthException
+import com.google.firebase.auth.FirebaseAuthInvalidCredentialsException
 import com.google.firebase.auth.GoogleAuthProvider
 import com.google.firebase.auth.ktx.auth
 import kotlinx.coroutines.CoroutineScope
@@ -70,21 +78,30 @@ fun LogInScreen(navController: NavController, auth: FirebaseAuth) {
     var errorMessage by remember { mutableStateOf<String?>(null) }
     var passwordVisible by remember { mutableStateOf(false) }
 
+    var isLoading by remember { mutableStateOf(false) }
+
     val primaryBlue = Color(0xFF2196F3)
 
     val context = LocalContext.current
     val scope = rememberCoroutineScope()
-    val launcher = rememberLauncherForActivityResult(contract = ActivityResultContracts.StartActivityForResult()) {
-        GoogleSignInUtils.doGoogleSignIn(
-            context = context,
-            scope = scope,
-            launcher = null,
-            login = {
+
+    val launcher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.StartActivityForResult()
+    ) {
+        scope.launch {
+            val result = GoogleSignInUtils.signIn(context)
+
+            result.onSuccess {
                 Toast.makeText(context, "Login successful", Toast.LENGTH_SHORT).show()
-                navController.navigate(Screen.Home.route)
+                navController.navigate(Screen.Home.route) {
+                    popUpTo(Screen.LogIn.route) { inclusive = true }
+                }
+            }.onFailure {
+                Toast.makeText(context, "Google Sign-In failed", Toast.LENGTH_SHORT).show()
             }
-        )
+        }
     }
+
 
     Box(
         modifier = Modifier
@@ -198,14 +215,51 @@ fun LogInScreen(navController: NavController, auth: FirebaseAuth) {
             // Sign In Button
             Button(
                 onClick = {
-                    auth.signInWithEmailAndPassword(email, password)
+
+                    if (isLoading) return@Button
+
+                    errorMessage=null
+                    Log.d("AUTH_LOGIN", "Login clicked")
+
+                    val cleanEmail = email.trim()
+                    val cleanPassword = password.trim()
+
+                    if (cleanEmail.isBlank() || cleanPassword.isBlank()) {
+                        errorMessage = "Email and password cannot be empty"
+                        Log.w("AUTH_LOGIN", "Empty fields")
+                        return@Button
+                    }
+
+                    isLoading = true
+
+                    auth.signInWithEmailAndPassword(cleanEmail, cleanPassword)
                         .addOnCompleteListener { task ->
+
+                            isLoading = false
+
                             if (task.isSuccessful) {
+                                val user = auth.currentUser
+                                Log.d("AUTH_LOGIN", "Login success: ${user?.uid}")
+
                                 navController.navigate(Screen.Home.route) {
                                     popUpTo(Screen.LogIn.route) { inclusive = true }
                                 }
+
                             } else {
-                                errorMessage = task.exception?.message
+                                val exception = task.exception
+                                Log.e("AUTH_LOGIN", "Login failed", exception)
+
+                                errorMessage = when (exception) {
+
+                                    is FirebaseAuthInvalidCredentialsException ->
+                                        "Invalid email or password."
+
+                                    is FirebaseAuthException ->
+                                        exception.localizedMessage ?: "Authentication failed."
+
+                                    else ->
+                                        "Unknown error occurred."
+                                }
                             }
                         }
                 },
@@ -216,9 +270,18 @@ fun LogInScreen(navController: NavController, auth: FirebaseAuth) {
                 shape = RoundedCornerShape(12.dp),
                 colors = ButtonDefaults.buttonColors(
                     containerColor = primaryBlue
-                )
+                ),
+                enabled = !isLoading
             ) {
-                Text(text = "Sign In", fontSize = 16.sp)
+                if (isLoading) {
+                    CircularProgressIndicator(
+                        modifier = Modifier.size(20.dp),
+                        strokeWidth = 2.dp,
+                        color = MaterialTheme.colorScheme.primary
+                    )
+                } else {
+                    Text(text = "Sign In", fontSize = 16.sp)
+                }
             }
 
             // Divider with text

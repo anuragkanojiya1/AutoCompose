@@ -37,15 +37,15 @@ import com.google.firebase.auth.FirebaseAuth
 @Composable
 fun NavGraph(
     navController: NavController,
-    frequentEmailViewModel: FrequentEmailViewModel,
-    autoComposeViewmodel: AutoComposeViewmodel,
-    paymentViewModel: PaymentViewModel,
-    application: Application,
+//    frequentEmailViewModel: FrequentEmailViewModel,
+//    autoComposeViewmodel: AutoComposeViewmodel,
+//    paymentViewModel: PaymentViewModel,
+//    application: Application,
+    firebaseAuth: FirebaseAuth
 ) {
 
     val context = LocalContext.current
     val navController = rememberNavController()
-    val auth = FirebaseAuth.getInstance()
 
     NavHost(navController, startDestination = Screen.Splash.route) {
         composable(Screen.Home.route,
@@ -57,8 +57,8 @@ fun NavGraph(
             }
         ) {
             HomeScreen(
-                frequentEmailViewModel = frequentEmailViewModel,
-                application = application,
+//                frequentEmailViewModel = frequentEmailViewModel,
+//                application = application,
                 navController = navController
             )
         }
@@ -70,13 +70,19 @@ fun NavGraph(
                 slideOutVertically(targetOffsetY = { it }, animationSpec = tween(500)) + fadeOut()
             }
         ) {
-            AgentScreen(autoComposeViewmodel, frequentEmailViewModel, navController)
+            AgentScreen(
+//                autoComposeViewmodel, frequentEmailViewModel,
+                navController = navController
+            )
         }
         composable(Screen.Analytics.route,
             enterTransition = { fadeIn(animationSpec = tween(700)) },
             exitTransition = { fadeOut(animationSpec = tween(700)) }
         ) {
-            AnalyticsScreen(autoComposeViewmodel, navController)
+            AnalyticsScreen(
+//                autoComposeViewmodel,
+                navController = navController
+            )
         }
         composable(
             route = Screen.DraftAgentScreen.route,
@@ -93,7 +99,9 @@ fun NavGraph(
         ) { backStackEntry ->
             val subject = backStackEntry.arguments?.getString("subject") ?: ""
             val emailBody = backStackEntry.arguments?.getString("emailBody") ?: ""
-            DraftAgentScreen(autoComposeViewmodel, frequentEmailViewModel, navController, subject, emailBody)
+            DraftAgentScreen(
+//                autoComposeViewmodel, frequentEmailViewModel,
+                navController = navController, passSubject = subject, passEmailContent = emailBody)
         }
 
         // Payment Screen
@@ -110,15 +118,17 @@ fun NavGraph(
             }
         ) { backStackEntry ->
             val amount = backStackEntry.arguments?.getString("amount") ?: "5.00"
-            PaymentScreen(navController, paymentViewModel, amount)
+            PaymentScreen(navController,
+//                autoComposeViewmodel, paymentViewModel,
+                amount = amount)
         }
 
         composable(Screen.SignUp.route) {
-            SignUpScreen(navController, auth)
+            SignUpScreen(navController, firebaseAuth)
         }
 
         composable(Screen.LogIn.route) {
-            LogInScreen(navController, auth)
+            LogInScreen(navController, firebaseAuth)
         }
 
         composable(Screen.Splash.route){
@@ -145,7 +155,9 @@ fun NavGraph(
                 slideOutHorizontally(targetOffsetX = { -it }, animationSpec = tween(600)) + fadeOut()
             }
         ) {
-            SubscriptionScreen(navController = navController, autoComposeViewmodel)
+            SubscriptionScreen(navController = navController,
+//                autoComposeViewmodel
+            )
         }
 
         composable(
