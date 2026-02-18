@@ -17,7 +17,15 @@
 ############################################################
 -keepattributes Signature
 -keepattributes *Annotation*
--keep class com.google.gson.annotations.SerializedName { *; }
+
+# Keep fields annotated with @SerializedName
+-keepclassmembers class * {
+    @com.google.gson.annotations.SerializedName <fields>;
+}
+
+# Keep classes referenced by @JsonAdapter
+-keep class * extends com.google.gson.JsonDeserializer
+-keep class * extends com.google.gson.JsonSerializer
 
 # Only keep your actual DTO models (adjust package)
 -keep class com.example.autocompose.domain.model.** { *; }
