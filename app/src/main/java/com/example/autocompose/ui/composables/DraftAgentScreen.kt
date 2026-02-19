@@ -110,8 +110,15 @@ fun DraftAgentScreen(
 
     var languageExpanded by remember { mutableStateOf(false) }
     var selectedModel by remember { mutableStateOf("Llama") }
-    var subject by remember { mutableStateOf("") }
-    var emailContent by remember { mutableStateOf("") }
+
+    var subject by rememberSaveable { mutableStateOf("") }
+    var emailContent by rememberSaveable { mutableStateOf("") }
+
+    LaunchedEffect(passSubject, passEmailContent) {
+        subject = passSubject
+        emailContent = passEmailContent
+    }
+
     var emailContext by remember { mutableStateOf("") }
 
     val generatedEmail = autoComposeViewmodel.generatedEmail.collectAsState()
@@ -191,14 +198,6 @@ fun DraftAgentScreen(
             putExtra(Intent.EXTRA_SUBJECT, subject)
             putExtra(Intent.EXTRA_TEXT, emailContent)
         }
-    }
-
-    LaunchedEffect(emailSubject.value) {
-        subject = emailSubject.value
-    }
-
-    LaunchedEffect(generatedEmail.value) {
-        emailContent = generatedEmail.value
     }
 
     Log.d("Subscription", subscription.toString())
