@@ -213,10 +213,18 @@ fun DraftAgentScreen(
                             Text("AutoCompose")
                         } },
                     actions = {
-                        IconButton(onClick = { navController.navigate(Screen.SettingsScreen.route) }) {
+                        IconButton(
+                            onClick = {
+                                frequentEmailViewModel.deleteEmailByContent(subject, emailContent)
+                                Toast.makeText(context, "Email deleted", Toast.LENGTH_SHORT).show()
+
+                                context.onBackPressedDispatcher.onBackPressed()
+                            },
+                        ) {
                             Icon(
-                                imageVector = Icons.Default.Settings,
-                                contentDescription = "Settings"
+                                imageVector = Icons.Default.Recycling,
+                                contentDescription = "Delete Email",
+                                tint = primaryBlue
                             )
                         }
                     },
@@ -657,7 +665,7 @@ fun DraftAgentScreen(
                     Button(
                         onClick = {
                             if (emailContext.isNotEmpty() && recipientEmails.any { it.isNotBlank() }) {
-                                // Prevent sending "string" as a value
+
                                 val validTone = selectedTone.ifBlank { "Professional" }
 
                                 val validModel = selectedModel.ifBlank { "Llama" }
@@ -673,7 +681,15 @@ fun DraftAgentScreen(
                                             language = validLanguage,
                                             context = emailContext,
                                             token = token
-                                        )}
+                                        )
+                                        if (subject.isNotBlank() && emailContent.isNotBlank()) {
+                                            Toast.makeText(
+                                                context,
+                                                "Email Generated",
+                                                Toast.LENGTH_SHORT
+                                            ).show()
+                                        }
+                                    }
                                     else{
                                         if (subscription!="free" || subscriptionTier=="premium"){
                                             autoComposeViewmodel.generateEmail(
@@ -683,6 +699,13 @@ fun DraftAgentScreen(
                                                 context = emailContext,
                                                 token = token
                                             )
+                                            if (subject.isNotBlank() && emailContent.isNotBlank()) {
+                                                Toast.makeText(
+                                                    context,
+                                                    "Email Generated",
+                                                    Toast.LENGTH_SHORT
+                                                ).show()
+                                            }
                                         } else {
                                             navController.navigate(Screen.PaymentScreen.route)
                                             Toast.makeText(context, "You need a subscription to use Mistral", Toast.LENGTH_SHORT).show()

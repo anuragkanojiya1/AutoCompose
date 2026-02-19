@@ -584,7 +584,14 @@ fun AgentScreen(
                                     language = validLanguage,
                                     context = emailContext,
                                     token = token
-                                )}
+                                )
+                                    if (subject.isNotBlank() && emailContent.isNotBlank()) {
+                                        Toast.makeText(
+                                            context,
+                                            "Email Generated",
+                                            Toast.LENGTH_SHORT
+                                        ).show()
+                                    }}
                                 else{
                                     if (subscription!="free" || subscriptionTier=="premium"){
                                         autoComposeViewmodel.generateEmail(
@@ -594,6 +601,13 @@ fun AgentScreen(
                                             context = emailContext,
                                             token = token
                                         )
+                                        if (subject.isNotBlank() && emailContent.isNotBlank()) {
+                                            Toast.makeText(
+                                                context,
+                                                "Email Generated",
+                                                Toast.LENGTH_SHORT
+                                            ).show()
+                                        }
                                     } else {
                                         navController.navigate(Screen.PaymentScreen.route)
                                         Toast.makeText(context, "You need a subscription to use Mistral", Toast.LENGTH_SHORT).show()
@@ -639,6 +653,8 @@ fun AgentScreen(
                                     subject = subject,
                                     emailBody = emailContent
                                 )
+                                Toast.makeText(context, "Email Saved", Toast.LENGTH_SHORT).show()
+
                                 Log.d("AgentScreen", "Saving email: '${emailSubject.value}'")
                                 Log.d("AgentScreen", "Updated frequency in database")
 //                                context.startActivity(createEmailIntent())
