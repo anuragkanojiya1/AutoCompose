@@ -52,18 +52,15 @@ class MainActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
 
-        FirebaseAuth.getInstance().addAuthStateListener { auth ->
-            val user = auth.currentUser
-            if (user != null) {
-                Log.d("AUTH_STATE", "User logged in: ${user.email}")
-            } else {
-                Log.d("AUTH_STATE", "User logged out")
-            }
-        }
+//        FirebaseAuth.getInstance().addAuthStateListener { auth ->
+//            val user = auth.currentUser
+//            if (user != null) {
+//                Log.d("AUTH_STATE", "User logged in: ${user.email}")
+//            } else {
+//                Log.d("AUTH_STATE", "User logged out")
+//            }
+//        }
 
-//        FirebaseApp.initializeApp(this)
-
-//        auth = Firebase.auth
         Log.d("MainActivity", "Initialized shared PaymentViewModel")
 
         setContent {

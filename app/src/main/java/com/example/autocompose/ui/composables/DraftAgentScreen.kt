@@ -76,6 +76,10 @@ import com.example.autocompose.ui.viewmodel.FrequentEmailViewModel
 import android.util.Log
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.width
+import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.Remove
+import androidx.compose.material.icons.filled.Send
+import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.IconButtonColors
 import androidx.compose.material3.IconButtonDefaults
@@ -86,6 +90,7 @@ import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
 import com.example.autocompose.data.datastore.PreferencesManager
 import com.example.autocompose.ui.navigation.Screen
+import com.google.firebase.auth.FirebaseAuth
 import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -98,17 +103,16 @@ fun DraftAgentScreen(
     passEmailContent: String
 ) {
     Log.d("DraftAgentScreen", "Initialized with subject: $passSubject and email content: $passEmailContent")
-    val primaryBlue = Color(0xFF2196F3)
-    var recipientEmail by remember { mutableStateOf("") }
-    var language by remember { mutableStateOf("English") }
-    var languageExpanded by remember { mutableStateOf(false) }
-    var selectedTone by remember { mutableStateOf("Professional") }
-    var selectedModel by remember { mutableStateOf("DeepSeek") }
-    var subject by remember { mutableStateOf(passSubject) }
-    var emailContent by remember { mutableStateOf(passEmailContent) }
-    var emailContext by remember { mutableStateOf("") }
 
-    Log.d("subject and body", "Subject $subject and email content $emailContent initialized")
+    val primaryBlue = Color(0xFF2196F3)
+
+    var recipientEmails by remember { mutableStateOf(mutableListOf("")) }
+
+    var languageExpanded by remember { mutableStateOf(false) }
+    var selectedModel by remember { mutableStateOf("Llama") }
+    var subject by remember { mutableStateOf("") }
+    var emailContent by remember { mutableStateOf("") }
+    var emailContext by remember { mutableStateOf("") }
 
     val generatedEmail = autoComposeViewmodel.generatedEmail.collectAsState()
     val emailSubject = autoComposeViewmodel.subject.collectAsState()
@@ -120,6 +124,28 @@ fun DraftAgentScreen(
     var token by rememberSaveable { mutableStateOf("") }
 
     val preferencesManager = PreferencesManager(context)
+
+    val defaultLanguage = preferencesManager.languageFlow.collectAsState(initial = "English")
+    val defaultFontFamily = preferencesManager.fontFamilyFlow.collectAsState(initial = "Default")
+    val defaultWritingStyle = preferencesManager.writingStyleFlow.collectAsState(initial = "Professional")
+
+    Log.d("DefaultFont", defaultFontFamily.value.toString())
+
+    var selectedTone by remember { mutableStateOf(defaultWritingStyle.value.toString()) }
+    LaunchedEffect(defaultWritingStyle.value) {
+        selectedTone = defaultWritingStyle.value.toString()
+    }
+
+    Log.d("defaultW", defaultWritingStyle.value)
+    Log.d("WritingTone", selectedTone)
+
+    var language by remember { mutableStateOf(defaultLanguage.value) }
+    LaunchedEffect(defaultLanguage.value) {
+        language = defaultLanguage.value
+    }
+
+    Log.d("defaultL", defaultLanguage.value)
+    Log.d("Language", language.toString())
 
     val subscriptionState = autoComposeViewmodel.checkSubscription.collectAsState()
 
@@ -136,22 +162,46 @@ fun DraftAgentScreen(
         }
     }
 
+    LaunchedEffect(Unit) {
+        FirebaseAuth.getInstance().currentUser?.getIdToken(true)
+            ?.addOnCompleteListener { task ->
+                if (task.isSuccessful) {
+                    token = task.result?.token ?: ""
+                    Log.d("Token", token)
+                } else {
+                    Toast.makeText(context, "Token is null Login again please", Toast.LENGTH_SHORT).show()
+                }
+            }
+    }
+
+
+    LaunchedEffect(token) {
+        if (token.isNotBlank()) {
+            autoComposeViewmodel.checkSubscription(token)
+            Log.d("Subscription", "Checking subscription with token")
+        }
+    }
+
+
     fun createEmailIntent(): Intent {
         return Intent(Intent.ACTION_SEND).apply {
             type = "message/rfc822"
             setPackage("com.google.android.gm")
-            putExtra(Intent.EXTRA_EMAIL, arrayOf(recipientEmail))
+            putExtra(Intent.EXTRA_EMAIL, recipientEmails.toTypedArray())
             putExtra(Intent.EXTRA_SUBJECT, subject)
             putExtra(Intent.EXTRA_TEXT, emailContent)
         }
     }
 
-    if (token.isNotBlank()) {
-        LaunchedEffect(Unit) {
-            autoComposeViewmodel.checkSubscription(token)
-            Log.d("Subscription", subscription.toString())
-        }
+    LaunchedEffect(emailSubject.value) {
+        subject = emailSubject.value
     }
+
+    LaunchedEffect(generatedEmail.value) {
+        emailContent = generatedEmail.value
+    }
+
+    Log.d("Subscription", subscription.toString())
 
     Scaffold(
         topBar = {
@@ -162,22 +212,12 @@ fun DraftAgentScreen(
                             Text("AutoCompose ✨")
                         } else{
                             Text("AutoCompose")
-                        }
-                    },
+                        } },
                     actions = {
-                        IconButton(
-                            onClick = {
-                                // Delete the current email if it exists in database
-                                frequentEmailViewModel.deleteEmailByContent(subject, emailContent)
-                                Toast.makeText(context, "Email deleted", Toast.LENGTH_SHORT).show()
-                                // Navigate back
-                                (context as? MainActivity)?.onBackPressedDispatcher?.onBackPressed()
-                            },
-                        ) {
+                        IconButton(onClick = { navController.navigate(Screen.SettingsScreen.route) }) {
                             Icon(
-                                imageVector = Icons.Default.Recycling,
-                                contentDescription = "Delete Email",
-                                tint = primaryBlue
+                                imageVector = Icons.Default.Settings,
+                                contentDescription = "Settings"
                             )
                         }
                     },
@@ -205,20 +245,113 @@ fun DraftAgentScreen(
             ) {
                 Spacer(modifier = Modifier.padding(top = 2.dp))
 
-                // Recipient email field
-                OutlinedTextField(
-                    value = recipientEmail,
-                    onValueChange = { recipientEmail = it },
-                    label = { Text("To: Recipient's email", color = Color.Gray) },
-                    modifier = Modifier.fillMaxWidth(),
-                    singleLine = true,
-                    colors = TextFieldDefaults.outlinedTextFieldColors(
-                        unfocusedTextColor = Color.Gray,
-                        unfocusedBorderColor = Color(0xFFE7E6E6),
-                        focusedBorderColor = primaryBlue
-                    ),
-                    shape = RoundedCornerShape(12.dp)
-                )
+                recipientEmails.forEachIndexed { index, email ->
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                        modifier = Modifier.fillMaxWidth()
+                    ) {
+                        OutlinedTextField(
+                            value = email,
+                            onValueChange = { newValue ->
+                                val updatedList = recipientEmails.toMutableList()
+                                updatedList[index] = newValue
+                                recipientEmails = updatedList
+                            },
+                            label = { Text("Recipient Email ${index + 1}", color = Color.Gray) },
+                            modifier = Modifier.weight(1f),
+                            singleLine = true,
+                            colors = TextFieldDefaults.outlinedTextFieldColors(
+                                unfocusedTextColor = Color.Gray,
+                                unfocusedBorderColor = Color(0xFFE7E6E6),
+                                focusedBorderColor = Color(0xFF2196F3)
+                            ),
+                            shape = RoundedCornerShape(12.dp),
+                            trailingIcon = {
+                                Row {
+                                    IconButton(
+                                        onClick = {
+
+                                            recipientEmails = recipientEmails.toMutableList().apply { add("") }
+                                        }
+                                    ) {
+                                        Icon(
+                                            imageVector = Icons.Default.Add,
+                                            contentDescription = "Add recipient"
+                                        )
+                                    }
+
+                                    if (recipientEmails.size > 1) {
+                                        IconButton(
+                                            onClick = {
+
+                                                recipientEmails = recipientEmails.toMutableList().apply { removeAt(index) }
+                                            }
+                                        ) {
+                                            Icon(
+                                                imageVector = Icons.Default.Remove,
+                                                contentDescription = "Remove recipient"
+                                            )
+                                        }
+                                    }
+                                }
+                            }
+                        )
+
+//                        Row {
+//                            IconButton(
+//                                onClick = {
+//
+//                                    recipientEmails = recipientEmails.toMutableList().apply { add("") }
+//                                }
+//                            ) {
+//                                Icon(
+//                                    imageVector = Icons.Default.Add,
+//                                    contentDescription = "Add recipient"
+//                                )
+//                            }
+//
+//                            if (recipientEmails.size > 1) {
+//                                IconButton(
+//                                    onClick = {
+//
+//                                        recipientEmails = recipientEmails.toMutableList().apply { removeAt(index) }
+//                                    }
+//                                ) {
+//                                    Icon(
+//                                        imageVector = Icons.Default.Remove,
+//                                        contentDescription = "Remove recipient"
+//                                    )
+//                                }
+//                            }
+//                        }
+                    }
+                }
+
+//                    for (i in 1..count) {
+//                        OutlinedTextField(
+//                            value = recipientEmail,
+//                            onValueChange = { recipientEmail = it },
+//                            label = { Text("To: Recipient's email", color = Color.Gray) },
+//                            modifier = Modifier.fillMaxWidth(),
+//                            singleLine = true,
+//                            colors = TextFieldDefaults.outlinedTextFieldColors(
+//                                unfocusedTextColor = Color.Gray,
+//                                unfocusedBorderColor = Color(0xFFE7E6E6),
+//                                focusedBorderColor = primaryBlue
+//                            ),
+//                            shape = RoundedCornerShape(12.dp),
+//                            trailingIcon = {
+//                                IconButton(onClick = {
+//                                    count++;
+//                                }) {
+//                                    Icon(
+//                                        imageVector = Icons.Default.Add,
+//                                        contentDescription = ""
+//                                    )
+//                                }
+//                            }
+//                        )
+//                    }
 
                 Card(
                     modifier = Modifier
@@ -291,6 +424,13 @@ fun DraftAgentScreen(
                                     onDismissRequest = { languageExpanded = false },
                                     modifier = Modifier.background(MaterialTheme.colorScheme.background)
                                 ) {
+                                    DropdownMenuItem(
+                                        text = { Text("German") },
+                                        onClick = {
+                                            language = "German"
+                                            languageExpanded = false
+                                        }
+                                    )
                                     DropdownMenuItem(
                                         text = { Text("English") },
                                         onClick = {
@@ -426,7 +566,6 @@ fun DraftAgentScreen(
                     )
                 }
 
-                // Subject field
                 OutlinedTextField(
                     value = subject,
                     onValueChange = { subject = it },
@@ -441,14 +580,14 @@ fun DraftAgentScreen(
                     shape = RoundedCornerShape(12.dp)
                 )
 
-                // Email content
                 Card(
                     modifier = Modifier
                         .fillMaxWidth()
                         .heightIn(min = 200.dp),
-                    shape = RoundedCornerShape(16.dp),
+                    shape = RoundedCornerShape(24.dp),
                     colors = CardDefaults.cardColors(
                         containerColor = MaterialTheme.colorScheme.surfaceContainer
+                        //Color(0xFFF8F7F7)
                     )
                 ) {
                     OutlinedTextField(
@@ -461,7 +600,13 @@ fun DraftAgentScreen(
                         textStyle = TextStyle(
                             fontSize = 20.sp,
                             color = MaterialTheme.colorScheme.onSurface,
-                            fontFamily = FontFamily.Serif,
+                            fontFamily = when(defaultFontFamily.value.toString()) {
+                                "FontFamily.Serif" -> FontFamily.Serif
+                                "FontFamily.SansSerif" -> FontFamily.SansSerif
+                                "FontFamily.Monospace" -> FontFamily.Monospace
+                                "FontFamily.Cursive" -> FontFamily.Cursive
+                                else -> FontFamily.Default
+                            },
                         ),
                         modifier = Modifier
                             .fillMaxWidth()
@@ -473,11 +618,11 @@ fun DraftAgentScreen(
                             unfocusedBorderColor = Color.Gray,
                             focusedBorderColor = Color.DarkGray,
                             focusedTextColor = MaterialTheme.colorScheme.onSurface,
-                            containerColor = MaterialTheme.colorScheme.surfaceContainer                        ),
+                            containerColor = MaterialTheme.colorScheme.surfaceContainer
+                        ),
                         shape = RoundedCornerShape(16.dp),
                     )
                 }
-
 
 //                Button(
 //                    onClick = {
@@ -507,19 +652,18 @@ fun DraftAgentScreen(
 
                 // Bottom buttons
                 Row(
-                    modifier = Modifier,
+                    modifier = Modifier.fillMaxWidth(),
                     horizontalArrangement = Arrangement.spacedBy(8.dp)
                 ) {
                     Button(
                         onClick = {
-                            if (emailContext.isNotEmpty() && recipientEmail.isNotEmpty()) {
+                            if (emailContext.isNotEmpty() && recipientEmails.any { it.isNotBlank() }) {
                                 // Prevent sending "string" as a value
-                                val validTone =
-                                    if (selectedTone == "string" || selectedTone.isBlank()) "Professional" else selectedTone
-                                val validModel =
-                                    if (selectedModel == "string" || selectedModel.isBlank()) "Llama" else selectedModel
-                                val validLanguage =
-                                    if (language == "string" || language.isBlank()) "English" else language
+                                val validTone = selectedTone.ifBlank { "Professional" }
+
+                                val validModel = selectedModel.ifBlank { "Llama" }
+
+                                val validLanguage = language.ifBlank { "English" }
 
                                 if (token.isNotBlank()) {
 
@@ -599,17 +743,17 @@ fun DraftAgentScreen(
                                 try {
                                     // Save email to the database and increment frequency
                                     frequentEmailViewModel.saveOrUpdateEmail(
-                                        subject = emailSubject.value,
-                                        emailBody = generatedEmail.value
+                                        subject = subject,
+                                        emailBody = emailContent
                                     )
-                                    Log.d("DraftAgentScreen", "Sending email with subject: '${emailSubject.value}'")
-                                    Log.d("DraftAgentScreen", "Updated frequency in database")
+                                    Log.d("AgentScreen", "Sending email with subject: '${emailSubject.value}'")
+                                    Log.d("AgentScreen", "Updated frequency in database")
                                     context.startActivity(createEmailIntent())
                                 } catch (e: ActivityNotFoundException) {
-                                    Log.e("DraftAgentScreen", "Gmail app not installed!", e)
+                                    Log.e("AgentScreen", "Gmail app not installed!", e)
                                     Toast.makeText(context, "Gmail app not installed!", Toast.LENGTH_SHORT).show()
                                 } catch (e: Exception) {
-                                    Log.e("DraftAgentScreen", "Error sending email", e)
+                                    Log.e("AgentScreen", "Error sending email", e)
                                     Toast.makeText(context, "Error sending email: ${e.message}", Toast.LENGTH_SHORT).show()
                                 }
                             else
@@ -618,14 +762,14 @@ fun DraftAgentScreen(
                         modifier = Modifier.weight(1f),
                         colors = ButtonDefaults.buttonColors(
                             containerColor = primaryBlue
-                        )
+                        ),
                     ) {
                         Row(
                             horizontalArrangement = Arrangement.spacedBy(8.dp),
                             verticalAlignment = Alignment.CenterVertically
                         ) {
                             Icon(
-                                imageVector = Icons.AutoMirrored.Filled.Send,
+                                imageVector = Icons.Filled.Send,
                                 tint = Color.White,
                                 contentDescription = "Send"
                             )

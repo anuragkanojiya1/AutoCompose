@@ -107,8 +107,6 @@ fun AgentScreen(
     var emailContent by remember { mutableStateOf("") }
     var emailContext by remember { mutableStateOf("") }
 
-    var count by remember { mutableStateOf(1) }
-
     val generatedEmail = autoComposeViewmodel.generatedEmail.collectAsState()
     val emailSubject = autoComposeViewmodel.subject.collectAsState()
 
@@ -170,9 +168,9 @@ fun AgentScreen(
     }
 
 
-        if (token.isNotBlank()) {
             LaunchedEffect(Unit) {
-                autoComposeViewmodel.checkSubscription(token)
+                if (token.isNotBlank()) {
+                    autoComposeViewmodel.checkSubscription(token)
                 Log.d("Subscription", subscription.toString())
             }
         }
@@ -291,62 +289,8 @@ fun AgentScreen(
                                 }
                             }
                         )
-
-//                        Row {
-//                            IconButton(
-//                                onClick = {
-//
-//                                    recipientEmails = recipientEmails.toMutableList().apply { add("") }
-//                                }
-//                            ) {
-//                                Icon(
-//                                    imageVector = Icons.Default.Add,
-//                                    contentDescription = "Add recipient"
-//                                )
-//                            }
-//
-//                            if (recipientEmails.size > 1) {
-//                                IconButton(
-//                                    onClick = {
-//
-//                                        recipientEmails = recipientEmails.toMutableList().apply { removeAt(index) }
-//                                    }
-//                                ) {
-//                                    Icon(
-//                                        imageVector = Icons.Default.Remove,
-//                                        contentDescription = "Remove recipient"
-//                                    )
-//                                }
-//                            }
-//                        }
                     }
                 }
-
-//                    for (i in 1..count) {
-//                        OutlinedTextField(
-//                            value = recipientEmail,
-//                            onValueChange = { recipientEmail = it },
-//                            label = { Text("To: Recipient's email", color = Color.Gray) },
-//                            modifier = Modifier.fillMaxWidth(),
-//                            singleLine = true,
-//                            colors = TextFieldDefaults.outlinedTextFieldColors(
-//                                unfocusedTextColor = Color.Gray,
-//                                unfocusedBorderColor = Color(0xFFE7E6E6),
-//                                focusedBorderColor = primaryBlue
-//                            ),
-//                            shape = RoundedCornerShape(12.dp),
-//                            trailingIcon = {
-//                                IconButton(onClick = {
-//                                    count++;
-//                                }) {
-//                                    Icon(
-//                                        imageVector = Icons.Default.Add,
-//                                        contentDescription = ""
-//                                    )
-//                                }
-//                            }
-//                        )
-//                    }
 
                 Card(
                     modifier = Modifier
@@ -622,7 +566,7 @@ fun AgentScreen(
 
                 Button(
                     onClick = {
-                        if (emailContext.isNotEmpty() && recipientEmails.isNotEmpty()) {
+                        if (emailContext.isNotEmpty() && recipientEmails.any { it.isNotBlank() }) {
                             // Prevent sending "string" as a value
                             val validTone =
                                 if (selectedTone == "string" || selectedTone.isBlank()) "Professional" else selectedTone
@@ -692,8 +636,8 @@ fun AgentScreen(
                             try {
                                 // Save email to the database and increment frequency
                                 frequentEmailViewModel.saveOrUpdateEmail(
-                                    subject = emailSubject.value,
-                                    emailBody = generatedEmail.value
+                                    subject = subject,
+                                    emailBody = emailContent
                                 )
                                 Log.d("AgentScreen", "Saving email: '${emailSubject.value}'")
                                 Log.d("AgentScreen", "Updated frequency in database")
@@ -732,8 +676,8 @@ fun AgentScreen(
                             try {
                                 // Save email to the database and increment frequency
                                 frequentEmailViewModel.saveOrUpdateEmail(
-                                    subject = emailSubject.value,
-                                    emailBody = generatedEmail.value
+                                    subject = subject,
+                                    emailBody = emailContent
                                 )
                                 Log.d("AgentScreen", "Sending email with subject: '${emailSubject.value}'")
                                 Log.d("AgentScreen", "Updated frequency in database")
@@ -769,26 +713,6 @@ fun AgentScreen(
                 }
             }
         }
-    }
-}
-
-@Composable
-fun ModelRadioButton(text: String, selectedOption: String, onOptionSelected: (String) -> Unit) {
-    Row(
-        verticalAlignment = Alignment.CenterVertically,
-        modifier = Modifier.fillMaxWidth()
-    ) {
-        RadioButton(
-            selected = text == selectedOption,
-            onClick = { onOptionSelected(text) },
-            colors = RadioButtonDefaults.colors(
-                selectedColor = Color(0xFF155ADA)
-            )
-        )
-        Text(
-            text = text,
-            modifier = Modifier.padding(start = 8.dp)
-        )
     }
 }
 
