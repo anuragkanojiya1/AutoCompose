@@ -102,6 +102,33 @@ Backend (Python - FastAPI)
  └── Deployed via Railway
 ```
 
+## 🌍 Localization (language + region)
+
+The app uses Android **locale qualifiers** so resources can target both **language** and **region** (see [Providing alternative resources](https://developer.android.com/guide/topics/resources/providing-resources#LocaleQualifier)).
+
+### Folder layout (examples)
+
+| Folder | Role |
+|--------|------|
+| `res/values/` | Default fallback; OAuth client IDs and strings that are identical everywhere |
+| `res/values-en/` | English strings shared by all English regions not overridden below |
+| `res/values-en-rGB/` | English (United Kingdom) overrides |
+| `res/values-en-rUS/` | English (United States) overrides |
+| `res/values-fr-rFR/` | French (France) overrides |
+| `res/values-es-rES/` | Spanish (Spain) overrides |
+
+### Resolution order
+
+Android picks the **best match**, then falls back. For example, for **en-GB**: `values-en-rGB` → `values-en` → `values`. If a string is missing in a folder, it is inherited from the next fallback. **Keep secrets (e.g. OAuth IDs) only in `values/`** unless you truly need a regional variant.
+
+### Runtime
+
+- `Context.getString()` / `stringResource()` use the same merged locale as the rest of the app.
+- Speech prompts use `voice_input_prompt` so UK/US/FR/ES users see region-appropriate copy where defined.
+- `LocaleConfiguration.currentLocaleTag()` reflects the effective locale used for configuration (log tag `MainActivity` on startup).
+
+---
+
 ## 📦 Installation & Setup
 
  Clone the Android project.
