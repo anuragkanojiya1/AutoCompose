@@ -48,15 +48,25 @@ jobs:
       run: |
         cat <<EOF > app/google-services.json
         {
-          "project_info": {
-          "project_number": "1234567890",
-          "project_id": "dummy-project",
-          "storage_bucket": "dummy.appspot.com"
+        "project_info": {
+        "project_number": "1234567890",
+        "project_id": "dummy-project",
+        "storage_bucket": "dummy.appspot.com"
         },
-          "client": [],
-          "configuration_version": "1"
+        "client": [
+        {
+          "client_info": {
+            "mobilesdk_app_id": "1:1234567890:android:dummy",
+            "android_client_info": {
+              "package_name": "com.example.autocompose"
+            }
+          }
+        }
+        ],
+        "configuration_version": "1"
         }
         EOF
+        echo "✅ Fully valid dummy google-services.json created"
 
     - name: Decode google-services.json
       if: github.event_name != 'pull_request'
