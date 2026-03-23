@@ -5,7 +5,11 @@ on:
     branches:
       - main
       - master 
-
+  push:
+    branches:
+      - main
+      - master
+      
 jobs:
   build-and-test:
     runs-on: ubuntu-latest
@@ -26,16 +30,62 @@ jobs:
     - name: Clean project
       run: ./gradlew clean
 
-    - name: Decode google-services.json
+    # - name: Decode google-services.json
+    #   run: |
+    #     echo "$GOOGLE_SERVICES_JSON" | base64 -d > app/google-services.json
+    #   env:
+    #     GOOGLE_SERVICES_JSON: ${{ secrets.GOOGLE_SERVICES_JSON }}
+
+    # - name: Reconstruct Constants.kt
+    #   run: |
+    #     mkdir -p app/src/main/java/com/example/autocompose/utils
+    #     echo "$CONSTANTS_KT" | base64 -d > app/src/main/java/com/example/autocompose/utils/Constants.kt
+    #   env:
+    #     CONSTANTS_KT: ${{ secrets.CONSTANTS_KT }}
+
+    - name: Create dummy google-services.json for PR
+      if: github.event_name == 'pull_request'
       run: |
+        echo '{}' > app/google-services.json
+        echo "✅ Dummy google-services.json created"
+
+    - name: Decode google-services.json
+      if: github.event_name != 'pull_request'
+      run: |
+        if [ -z "$GOOGLE_SERVICES_JSON" ]; then
+          echo "❌ ERROR: GOOGLE_SERVICES_JSON is empty!"
+          exit 1
+        fi
+
         echo "$GOOGLE_SERVICES_JSON" | base64 -d > app/google-services.json
+
+        if [ ! -s app/google-services.json ]; then
+          echo "❌ ERROR: Decoded google-services.json is empty!"
+          exit 1
+        fi
+
+        echo "✅ google-services.json decoded successfully"
       env:
         GOOGLE_SERVICES_JSON: ${{ secrets.GOOGLE_SERVICES_JSON }}
 
-    - name: Reconstruct Constants.kt
+    - name: Create dummy Constants.kt for PR
+      if: github.event_name == 'pull_request'
       run: |
         mkdir -p app/src/main/java/com/example/autocompose/utils
+        echo "object Constants {}" > app/src/main/java/com/example/autocompose/utils/Constants.kt
+
+    - name: Reconstruct Constants.kt
+      if: github.event_name != 'pull_request'
+      run: |
+        mkdir -p app/src/main/java/com/example/autocompose/utils
+
+        if [ -z "$CONSTANTS_KT" ]; then
+          echo "❌ ERROR: CONSTANTS_KT is empty!"
+          exit 1
+        fi
+
         echo "$CONSTANTS_KT" | base64 -d > app/src/main/java/com/example/autocompose/utils/Constants.kt
+        echo "✅ Constants.kt reconstructed"
       env:
         CONSTANTS_KT: ${{ secrets.CONSTANTS_KT }}
 
