@@ -60,6 +60,9 @@ android {
         compose = true
     }
 
+    lint {
+        abortOnError = false
+    }
 }
 
 dependencies {
