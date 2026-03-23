@@ -1,12 +1,18 @@
+val isCI = System.getenv("CI") == "true"
+
 plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.android)
     alias(libs.plugins.kotlin.compose)
     id("com.google.devtools.ksp")
-    alias(libs.plugins.google.gms.google.services)
-    alias(libs.plugins.google.firebase.crashlytics)
+//    alias(libs.plugins.google.gms.google.services)
+//    alias(libs.plugins.google.firebase.crashlytics)
     id("com.google.dagger.hilt.android")
+}
 
+if (!isCI) {
+    apply(plugin = "com.google.gms.google-services")
+    apply(plugin = "com.google.firebase.crashlytics")
 }
 
 android {
@@ -29,7 +35,7 @@ android {
 
     signingConfigs {
         create("release") {
-                storeFile = file("my-release-key.jks")
+                storeFile = file("E:\\AndroidProjects\\AutoCompose\\my-release-key.jks")
                 storePassword = System.getenv("KEYSTORE_PASSWORD")
                 keyAlias = System.getenv("KEY_ALIAS")
                 keyPassword = System.getenv("KEY_PASSWORD")
