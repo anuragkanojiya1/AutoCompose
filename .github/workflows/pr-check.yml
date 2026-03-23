@@ -31,16 +31,16 @@ jobs:
       run: |
         if [ -z "$GOOGLE_SERVICES_JSON" ]; then
           echo "⚠️ GOOGLE_SERVICES_JSON secret is missing! Creating dummy google-services.json for Fork PR build."
-          cat <<EOF > app/google-services.json
-          {
-            "project_info": { "project_number": "0", "project_id": "dummy", "storage_bucket": "dummy" },
-            "client": [{
-              "client_info": { "mobilesdk_app_id": "1:0:android:0", "android_client_info": { "package_name": "com.example.autocompose" } },
-              "oauth_client": [], "api_key": [{ "current_key": "dummy" }], "services": { "appinvite_service": { "other_platform_oauth_client": [] } }
-            }],
-            "configuration_version": "1"
-          }
-          EOF
+          cat <<'EOF' > app/google-services.json
+        {
+          "project_info": { "project_number": "0", "project_id": "dummy", "storage_bucket": "dummy" },
+          "client": [{
+            "client_info": { "mobilesdk_app_id": "1:0:android:0", "android_client_info": { "package_name": "com.example.autocompose" } },
+            "oauth_client": [], "api_key": [{ "current_key": "dummy" }], "services": { "appinvite_service": { "other_platform_oauth_client": [] } }
+          }],
+          "configuration_version": "1"
+        }
+        EOF
         else
           echo "$GOOGLE_SERVICES_JSON" | base64 -d > app/google-services.json
           if [ ! -s app/google-services.json ]; then
@@ -57,13 +57,13 @@ jobs:
         mkdir -p app/src/main/java/com/example/autocompose/utils
         if [ -z "$CONSTANTS_KT" ]; then
           echo "⚠️ CONSTANTS_KT secret is missing! Creating dummy Constants.kt for Fork PR build."
-          cat <<EOF > app/src/main/java/com/example/autocompose/utils/Constants.kt
-          package com.example.autocompose.utils
-          object Constants {
-              const val PUBLISHABLE_KEY = "DUMMY_CLIENT_ID"
-              const val SECRET_KEY = "DUMMY_SECRET_KEY"
-          }
-          EOF
+          cat <<'EOF' > app/src/main/java/com/example/autocompose/utils/Constants.kt
+        package com.example.autocompose.utils
+        object Constants {
+            const val PUBLISHABLE_KEY = "DUMMY_CLIENT_ID"
+            const val SECRET_KEY = "DUMMY_SECRET_KEY"
+        }
+        EOF
         else
           echo "$CONSTANTS_KT" | base64 -d > app/src/main/java/com/example/autocompose/utils/Constants.kt
           echo "✅ Constants.kt reconstructed successfully"
