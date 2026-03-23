@@ -32,14 +32,29 @@ jobs:
       run: ./gradlew clean
       
     - name: Decode google-services.json
-      run: echo "$GOOGLE_SERVICES_JSON" | base64 -d > app/google-services.json
+      run: |
+        if [ -z "$GOOGLE_SERVICES_JSON" ]; then
+          echo "❌ ERROR: GOOGLE_SERVICES_JSON secret is not set in GitHub Secrets!"
+          exit 1
+        fi
+        echo "$GOOGLE_SERVICES_JSON" | base64 -d > app/google-services.json
+        if [ ! -s app/google-services.json ]; then
+          echo "❌ ERROR: Decoded google-services.json is empty or malformed!"
+          exit 1
+        fi
+        echo "✅ google-services.json decoded successfully"
       env:
         GOOGLE_SERVICES_JSON: ${{ secrets.GOOGLE_SERVICES_JSON }}
 
     - name: Reconstruct Constants.kt
       run: |
+        if [ -z "$CONSTANTS_KT" ]; then
+          echo "❌ ERROR: CONSTANTS_KT secret is not set in GitHub Secrets!"
+          exit 1
+        fi
         mkdir -p app/src/main/java/com/example/autocompose/utils
         echo "$CONSTANTS_KT" | base64 -d > app/src/main/java/com/example/autocompose/utils/Constants.kt
+        echo "✅ Constants.kt reconstructed successfully"
       env:
         CONSTANTS_KT: ${{ secrets.CONSTANTS_KT }}
 
