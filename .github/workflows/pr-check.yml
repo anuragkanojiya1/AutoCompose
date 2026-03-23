@@ -46,8 +46,17 @@ jobs:
     - name: Create dummy google-services.json for PR
       if: github.event_name == 'pull_request'
       run: |
-        echo '{}' > app/google-services.json
-        echo "✅ Dummy google-services.json created"
+        cat <<EOF > app/google-services.json
+        {
+          "project_info": {
+          "project_number": "1234567890",
+          "project_id": "dummy-project",
+          "storage_bucket": "dummy.appspot.com"
+        },
+          "client": [],
+          "configuration_version": "1"
+        }
+        EOF
 
     - name: Decode google-services.json
       if: github.event_name != 'pull_request'
@@ -72,7 +81,15 @@ jobs:
       if: github.event_name == 'pull_request'
       run: |
         mkdir -p app/src/main/java/com/example/autocompose/utils
-        echo "object Constants {}" > app/src/main/java/com/example/autocompose/utils/Constants.kt
+        cat <<EOF > app/src/main/java/com/example/autocompose/utils/Constants.kt
+        package com.example.autocompose.utils
+
+        object Constants {
+        const val PUBLISHABLE_KEY = "pk_test_dummy"
+        const val SECRET_KEY = "sk_test_dummy"
+        }
+        EOF
+        echo "✅ Dummy Constants.kt created"
 
     - name: Reconstruct Constants.kt
       if: github.event_name != 'pull_request'
