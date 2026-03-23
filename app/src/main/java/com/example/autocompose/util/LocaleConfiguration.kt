@@ -11,7 +11,7 @@ object LocaleConfiguration {
         return if (locales.size() == 0) {
             "und"
         } else {
-            locales[0].toLanguageTag()
+            locales[0]?.toLanguageTag() ?: "und"
         }
     }
 }
