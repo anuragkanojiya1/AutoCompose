@@ -46,50 +46,6 @@ jobs:
     #   env:
     #     CONSTANTS_KT: ${{ secrets.CONSTANTS_KT }}
 
-    - name: Create dummy google-services.json for PR
-      if: github.event_name == 'pull_request'
-      run: |
-        cat <<EOF > app/google-services.json
-        {
-        "project_info": {
-        "project_number": "1234567890",
-        "project_id": "dummy-project",
-        "storage_bucket": "dummy.appspot.com"
-        },
-        "client": [
-        {
-          "client_info": {
-            "mobilesdk_app_id": "1:1234567890:android:dummy",
-            "android_client_info": {
-              "package_name": "com.example.autocompose"
-            }
-          }
-        }
-        ],
-        "configuration_version": "1"
-        }
-        EOF
-        echo "✅ Fully valid dummy google-services.json created"
-
-    - name: Decode google-services.json
-      if: github.event_name != 'pull_request'
-      run: |
-        if [ -z "$GOOGLE_SERVICES_JSON" ]; then
-          echo "❌ ERROR: GOOGLE_SERVICES_JSON is empty!"
-          exit 1
-        fi
-
-        echo "$GOOGLE_SERVICES_JSON" | base64 -d > app/google-services.json
-
-        if [ ! -s app/google-services.json ]; then
-          echo "❌ ERROR: Decoded google-services.json is empty!"
-          exit 1
-        fi
-
-        echo "✅ google-services.json decoded successfully"
-      env:
-        GOOGLE_SERVICES_JSON: ${{ secrets.GOOGLE_SERVICES_JSON }}
-
     - name: Create dummy Constants.kt for PR
       if: github.event_name == 'pull_request'
       run: |
@@ -98,8 +54,8 @@ jobs:
         package com.example.autocompose.utils
 
         object Constants {
-        const val PUBLISHABLE_KEY = "pk_test_dummy"
-        const val SECRET_KEY = "sk_test_dummy"
+            const val PUBLISHABLE_KEY = "pk_test_dummy"
+            const val SECRET_KEY = "sk_test_dummy"
         }
         EOF
         echo "✅ Dummy Constants.kt created"
