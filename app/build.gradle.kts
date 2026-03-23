@@ -1,12 +1,18 @@
+val isCI = System.getenv("CI") == "true"
+
 plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.android)
     alias(libs.plugins.kotlin.compose)
     id("com.google.devtools.ksp")
-    alias(libs.plugins.google.gms.google.services)
-    alias(libs.plugins.google.firebase.crashlytics)
+//    alias(libs.plugins.google.gms.google.services)
+//    alias(libs.plugins.google.firebase.crashlytics)
     id("com.google.dagger.hilt.android")
+}
 
+if (!isCI) {
+    apply(plugin = "com.google.gms.google-services")
+    apply(plugin = "com.google.firebase.crashlytics")
 }
 
 android {
