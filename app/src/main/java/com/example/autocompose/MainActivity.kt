@@ -24,6 +24,7 @@ import androidx.lifecycle.lifecycleScope
 import androidx.navigation.compose.rememberNavController
 import com.example.autocompose.ui.navigation.NavGraph
 import com.example.autocompose.ui.theme.AutoComposeTheme
+import com.example.autocompose.util.LocaleConfiguration
 import com.example.autocompose.ui.viewmodel.AutoComposeViewmodel
 import com.example.autocompose.ui.viewmodel.FrequentEmailViewModel
 import com.example.autocompose.ui.viewmodel.PaymentViewModel
@@ -62,6 +63,10 @@ class MainActivity : ComponentActivity() {
 //        }
 
         Log.d("MainActivity", "Initialized shared PaymentViewModel")
+        Log.d(
+            "MainActivity",
+            "Effective locale for resources: ${LocaleConfiguration.currentLocaleTag(this)}"
+        )
 
         setContent {
             Log.d("MainActivity", "Initializing ViewModels")
@@ -129,7 +134,11 @@ class MainActivity : ComponentActivity() {
 
     fun askSpeechInput(context: Context) {
         if (!SpeechRecognizer.isRecognitionAvailable(context)) {
-            Toast.makeText(context, "Speech not Available", Toast.LENGTH_SHORT).show()
+            Toast.makeText(
+                context,
+                context.getString(R.string.speech_not_available),
+                Toast.LENGTH_SHORT
+            ).show()
         } else {
             val intent = Intent(RecognizerIntent.ACTION_RECOGNIZE_SPEECH)
             intent.putExtra(
@@ -137,7 +146,10 @@ class MainActivity : ComponentActivity() {
                 RecognizerIntent.LANGUAGE_MODEL_WEB_SEARCH
             )
             intent.putExtra(RecognizerIntent.EXTRA_LANGUAGE, Locale.getDefault())
-            intent.putExtra(RecognizerIntent.EXTRA_PROMPT, "Talk")
+            intent.putExtra(
+                RecognizerIntent.EXTRA_PROMPT,
+                context.getString(R.string.voice_input_prompt)
+            )
             Log.d("MainActivity", "Launching speech recognition")
             startActivityForResult(intent, 102)
         }
